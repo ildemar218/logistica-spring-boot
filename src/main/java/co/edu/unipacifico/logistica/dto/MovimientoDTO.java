@@ -8,6 +8,7 @@ public class MovimientoDTO {
     private Long movimientoId;
     private LocalDateTime fecha;
     private String tipo;
+    private String concepto;
     private String productoCodigo;
     private String productoNombre;
     private String bodegaNombre;
@@ -22,6 +23,8 @@ public class MovimientoDTO {
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
+    public String getConcepto() { return concepto; }
+    public void setConcepto(String concepto) { this.concepto = concepto; }
     public String getProductoCodigo() { return productoCodigo; }
     public void setProductoCodigo(String productoCodigo) { this.productoCodigo = productoCodigo; }
     public String getProductoNombre() { return productoNombre; }

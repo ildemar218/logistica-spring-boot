@@ -1,6 +1,7 @@
 -- Sistema de logística: inventario y cadena de suministro
 -- Base de datos MariaDB. Ejecutar completo en HeidiSQL.
--- Crea la base, las tablas y el rol básico. No contiene usuarios ni contraseñas.
+-- Crea la base, las tablas y los roles. No contiene usuarios.
+-- Si la base ya existía con una versión anterior, primero: DROP DATABASE logistica;
 
 CREATE DATABASE IF NOT EXISTS logistica
   CHARACTER SET utf8mb4
@@ -8,7 +9,7 @@ CREATE DATABASE IF NOT EXISTS logistica
 USE logistica;
 
 -- =========================================================
--- Parte 2: usuarios y roles
+-- Usuarios y roles
 -- =========================================================
 CREATE TABLE IF NOT EXISTS rol (
   id BIGINT NOT NULL AUTO_INCREMENT,
@@ -38,10 +39,16 @@ CREATE TABLE IF NOT EXISTS usuarios_roles (
   FOREIGN KEY (rol_id) REFERENCES rol(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT IGNORE INTO rol (nombre) VALUES ('ROLE_USER');
+-- ROLE_USER: usuario registrado que aún no tiene un rol asignado por el administrador.
+INSERT IGNORE INTO rol (nombre) VALUES
+  ('ROLE_ADMIN'),
+  ('ROLE_COORDINADOR'),
+  ('ROLE_AUXILIAR_BODEGA'),
+  ('ROLE_TRANSPORTADOR'),
+  ('ROLE_USER');
 
 -- =========================================================
--- Parte 3: catálogos
+-- Catálogos
 -- =========================================================
 CREATE TABLE IF NOT EXISTS proveedores (
   proveedor_id BIGINT NOT NULL AUTO_INCREMENT,
@@ -132,10 +139,14 @@ CREATE TABLE IF NOT EXISTS existencias (
   FOREIGN KEY (bodega_id) REFERENCES bodegas(bodega_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- tipo: ENTRADA o SALIDA.
+-- concepto: ENTRADA_PROVEEDOR, VENTA, MERMA, AJUSTE, CONSUMO_INTERNO, TRANSFERENCIA,
+--           DESPACHO, DEVOLUCION o ANULACION.
 CREATE TABLE IF NOT EXISTS movimientos_inventario (
   movimiento_id BIGINT NOT NULL AUTO_INCREMENT,
   fecha DATETIME NOT NULL,
   tipo VARCHAR(10) NOT NULL,
+  concepto VARCHAR(20) NOT NULL,
   producto_id BIGINT NOT NULL,
   bodega_id BIGINT NOT NULL,
   cantidad INT NOT NULL,
@@ -148,42 +159,102 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- Abastecimiento: órdenes de compra a proveedores
+-- Entradas de mercancía por proveedor
 -- =========================================================
-CREATE TABLE IF NOT EXISTS ordenes_compra (
-  orden_id BIGINT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS entradas (
+  entrada_id BIGINT NOT NULL AUTO_INCREMENT,
   numero VARCHAR(20) NOT NULL,
   fecha DATE NOT NULL,
-  fecha_entrega_esperada DATE,
   proveedor_id BIGINT NOT NULL,
   bodega_id BIGINT NOT NULL,
+  documento_proveedor VARCHAR(40),
   estado VARCHAR(15) NOT NULL,
   observacion VARCHAR(255),
   subtotal DECIMAL(14,2) NOT NULL,
   iva DECIMAL(14,2) NOT NULL,
   total DECIMAL(14,2) NOT NULL,
+  usuario VARCHAR(50),
   fecha_creacion DATETIME,
-  fecha_recepcion DATETIME,
-  PRIMARY KEY (orden_id),
+  PRIMARY KEY (entrada_id),
   UNIQUE (numero),
   FOREIGN KEY (proveedor_id) REFERENCES proveedores(proveedor_id),
   FOREIGN KEY (bodega_id) REFERENCES bodegas(bodega_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS detalle_orden_compra (
+CREATE TABLE IF NOT EXISTS detalle_entrada (
   detalle_id BIGINT NOT NULL AUTO_INCREMENT,
-  orden_id BIGINT NOT NULL,
+  entrada_id BIGINT NOT NULL,
   producto_id BIGINT NOT NULL,
   cantidad INT NOT NULL,
   costo_unitario DECIMAL(14,2) NOT NULL,
   subtotal DECIMAL(14,2) NOT NULL,
   PRIMARY KEY (detalle_id),
-  FOREIGN KEY (orden_id) REFERENCES ordenes_compra(orden_id),
+  FOREIGN KEY (entrada_id) REFERENCES entradas(entrada_id),
   FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- Distribución: despachos a clientes
+-- Salidas de mercancía (venta, merma, ajuste, consumo interno)
+-- =========================================================
+CREATE TABLE IF NOT EXISTS salidas (
+  salida_id BIGINT NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(20) NOT NULL,
+  fecha DATE NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  bodega_id BIGINT NOT NULL,
+  cliente_id BIGINT NULL,
+  motivo VARCHAR(255) NOT NULL,
+  estado VARCHAR(15) NOT NULL,
+  usuario VARCHAR(50),
+  fecha_creacion DATETIME,
+  PRIMARY KEY (salida_id),
+  UNIQUE (numero),
+  FOREIGN KEY (bodega_id) REFERENCES bodegas(bodega_id),
+  FOREIGN KEY (cliente_id) REFERENCES clientes(cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS detalle_salida (
+  detalle_id BIGINT NOT NULL AUTO_INCREMENT,
+  salida_id BIGINT NOT NULL,
+  producto_id BIGINT NOT NULL,
+  cantidad INT NOT NULL,
+  PRIMARY KEY (detalle_id),
+  FOREIGN KEY (salida_id) REFERENCES salidas(salida_id),
+  FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================================================
+-- Transferencias entre bodegas
+-- =========================================================
+CREATE TABLE IF NOT EXISTS transferencias (
+  transferencia_id BIGINT NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(20) NOT NULL,
+  fecha DATE NOT NULL,
+  bodega_origen_id BIGINT NOT NULL,
+  bodega_destino_id BIGINT NOT NULL,
+  responsable VARCHAR(100),
+  observacion VARCHAR(255),
+  usuario VARCHAR(50),
+  fecha_creacion DATETIME,
+  PRIMARY KEY (transferencia_id),
+  UNIQUE (numero),
+  FOREIGN KEY (bodega_origen_id) REFERENCES bodegas(bodega_id),
+  FOREIGN KEY (bodega_destino_id) REFERENCES bodegas(bodega_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS detalle_transferencia (
+  detalle_id BIGINT NOT NULL AUTO_INCREMENT,
+  transferencia_id BIGINT NOT NULL,
+  producto_id BIGINT NOT NULL,
+  cantidad INT NOT NULL,
+  PRIMARY KEY (detalle_id),
+  FOREIGN KEY (transferencia_id) REFERENCES transferencias(transferencia_id),
+  FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================================================
+-- Órdenes de despacho y seguimiento de entregas
+-- Estados: PENDIENTE, EN_RUTA, ENTREGADO, DEVUELTO, CANCELADO
 -- =========================================================
 CREATE TABLE IF NOT EXISTS despachos (
   despacho_id BIGINT NOT NULL AUTO_INCREMENT,
@@ -192,19 +263,23 @@ CREATE TABLE IF NOT EXISTS despachos (
   cliente_id BIGINT NOT NULL,
   bodega_id BIGINT NOT NULL,
   direccion_entrega VARCHAR(200) NOT NULL,
-  transportista VARCHAR(100),
+  transportador_id BIGINT NOT NULL,
+  vehiculo VARCHAR(20),
   numero_guia VARCHAR(40),
   estado VARCHAR(15) NOT NULL,
   observacion VARCHAR(255),
+  motivo_devolucion VARCHAR(255),
   subtotal DECIMAL(14,2) NOT NULL,
   iva DECIMAL(14,2) NOT NULL,
   total DECIMAL(14,2) NOT NULL,
   fecha_creacion DATETIME,
+  fecha_salida DATETIME,
   fecha_entrega DATETIME,
   PRIMARY KEY (despacho_id),
   UNIQUE (numero),
   FOREIGN KEY (cliente_id) REFERENCES clientes(cliente_id),
-  FOREIGN KEY (bodega_id) REFERENCES bodegas(bodega_id)
+  FOREIGN KEY (bodega_id) REFERENCES bodegas(bodega_id),
+  FOREIGN KEY (transportador_id) REFERENCES usuarios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS detalle_despacho (
@@ -217,6 +292,17 @@ CREATE TABLE IF NOT EXISTS detalle_despacho (
   PRIMARY KEY (detalle_id),
   FOREIGN KEY (despacho_id) REFERENCES despachos(despacho_id),
   FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS seguimiento_despacho (
+  seguimiento_id BIGINT NOT NULL AUTO_INCREMENT,
+  despacho_id BIGINT NOT NULL,
+  fecha DATETIME NOT NULL,
+  estado VARCHAR(15) NOT NULL,
+  usuario VARCHAR(50),
+  observacion VARCHAR(255),
+  PRIMARY KEY (seguimiento_id),
+  FOREIGN KEY (despacho_id) REFERENCES despachos(despacho_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Verificación

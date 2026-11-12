@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entradas</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Entradas de mercancía</h1>
+      <a class="boton" th:href="@{/entradas/crear}">Registrar entrada</a>
+    </div>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Número</th><th>Fecha</th><th>Proveedor</th><th>Bodega</th><th>Documento</th>
+              <th>Estado</th><th class="num">Total</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="e : ${entradas}">
+            <td th:text="${e.numero}"></td>
+            <td th:text="${#temporals.format(e.fecha, 'dd/MM/yyyy')}"></td>
+            <td th:text="${e.proveedorNombre}"></td>
+            <td th:text="${e.bodegaNombre}"></td>
+            <td th:text="${e.documentoProveedor}"></td>
+            <td><span th:replace="~{fragments/estados :: documento(${e.estado})}"></span></td>
+            <td class="num" th:text="${#numbers.formatDecimal(e.total, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td><a th:href="@{/entradas/{id}(id=${e.entradaId})}">Ver</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(entradas)}"><td colspan="8" class="vacio">No hay entradas registradas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

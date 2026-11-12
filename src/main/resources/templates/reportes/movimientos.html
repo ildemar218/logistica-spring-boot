@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte de movimientos</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Reporte de movimientos</h1>
+      <div class="acciones no-imprimir">
+        <a class="boton secundario"
+           th:href="@{/reportes/movimientos.csv(desde=${desde},hasta=${hasta},bodegaId=${bodegaId},productoId=${productoId},tipo=${tipo},concepto=${concepto})}">Exportar a Excel (CSV)</a>
+        <button class="boton secundario" type="button" onclick="window.print()">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <form class="formulario ancho no-imprimir" th:action="@{/reportes/movimientos}" method="get">
+      <div class="campo"><label for="desde">Desde</label><input id="desde" type="date" name="desde" th:value="${desde}"></div>
+      <div class="campo"><label for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" th:value="${hasta}"></div>
+      <div class="campo">
+        <label for="bodegaId">Bodega</label>
+        <select id="bodegaId" name="bodegaId">
+          <option value="">Todas</option>
+          <option th:each="b : ${bodegas}" th:value="${b.bodegaId}" th:text="${b.nombre}" th:selected="${b.bodegaId == bodegaId}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="productoId">Producto</label>
+        <select id="productoId" name="productoId">
+          <option value="">Todos</option>
+          <option th:each="p : ${productos}" th:value="${p.productoId}" th:text="${p.codigo + ' - ' + p.nombre}" th:selected="${p.productoId == productoId}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" name="tipo">
+          <option value="">Entradas y salidas</option>
+          <option value="ENTRADA" th:selected="${tipo == 'ENTRADA'}">Solo entradas</option>
+          <option value="SALIDA" th:selected="${tipo == 'SALIDA'}">Solo salidas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="concepto">Concepto</label>
+        <select id="concepto" name="concepto">
+          <option value="">Todos</option>
+          <option th:each="c : ${conceptos}" th:value="${c}" th:text="${#strings.replace(c, '_', ' ')}" th:selected="${c == concepto}"></option>
+        </select>
+      </div>
+      <div class="acciones"><button class="boton" type="submit">Generar reporte</button></div>
+    </form>
+
+    <p class="subtitulo">
+      <span th:text="${'Periodo: ' + (desde != null ? #temporals.format(desde, 'dd/MM/yyyy') : 'inicio') + ' a ' + (hasta != null ? #temporals.format(hasta, 'dd/MM/yyyy') : 'hoy')}"></span> ·
+      <span th:text="${#lists.size(movimientos) + ' movimientos'}"></span> ·
+      <span th:text="${'Unidades que entraron: ' + totalEntradas}"></span> ·
+      <span th:text="${'Unidades que salieron: ' + totalSalidas}"></span>
+    </p>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Producto</th><th>Bodega</th>
+              <th class="num">Cantidad</th><th class="num">Saldo</th><th>Referencia</th><th>Usuario</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="m : ${movimientos}">
+            <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            <td><span th:replace="~{fragments/estados :: movimiento(${m.tipo})}"></span></td>
+            <td th:text="${#strings.replace(m.concepto, '_', ' ')}"></td>
+            <td th:text="${m.productoCodigo + ' - ' + m.productoNombre}"></td>
+            <td th:text="${m.bodegaNombre}"></td>
+            <td class="num" th:text="${(m.tipo == 'ENTRADA' ? '+' : '−') + m.cantidad}"></td>
+            <td class="num" th:text="${m.saldo}"></td>
+            <td th:text="${m.referencia}"></td>
+            <td th:text="${m.usuario}"></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(movimientos)}"><td colspan="9" class="vacio">No hay movimientos con esos filtros.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

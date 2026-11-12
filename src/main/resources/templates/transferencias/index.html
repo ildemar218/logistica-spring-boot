@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transferencias</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Transferencias entre bodegas</h1>
+      <a class="boton" th:href="@{/transferencias/crear}">Registrar transferencia</a>
+    </div>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Número</th><th>Fecha</th><th>Origen</th><th>Destino</th><th>Responsable</th><th class="num">Productos</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="t : ${transferencias}">
+            <td th:text="${t.numero}"></td>
+            <td th:text="${#temporals.format(t.fecha, 'dd/MM/yyyy')}"></td>
+            <td th:text="${t.bodegaOrigenNombre}"></td>
+            <td th:text="${t.bodegaDestinoNombre}"></td>
+            <td th:text="${t.responsable ?: '—'}"></td>
+            <td class="num" th:text="${#lists.size(t.detalles)}"></td>
+            <td><a th:href="@{/transferencias/{id}(id=${t.transferenciaId})}">Ver</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(transferencias)}"><td colspan="7" class="vacio">No hay transferencias registradas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

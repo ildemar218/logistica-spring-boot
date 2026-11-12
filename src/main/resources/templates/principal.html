@@ -9,76 +9,117 @@
 <body class="app">
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
-    <h1>Tablero de la cadena de suministro</h1>
-    <p class="subtitulo">Hola, <strong th:text="${usuarioActual}">usuario</strong>. Este es el estado actual del inventario.</p>
+    <h1>Tablero de logística</h1>
+    <p class="subtitulo">Hola, <strong th:text="${usuarioActual}">usuario</strong>.</p>
 
-    <div class="flujo">
-      <span class="paso">Proveedor</span> → <span class="paso">Orden de compra</span> →
-      <span class="paso">Recepción en bodega</span> → <span class="paso">Existencias</span> →
-      <span class="paso">Despacho</span> → <span class="paso">Cliente</span>
+    <!-- Usuario sin rol asignado -->
+    <div th:if="${permisos.sinRol}" class="mensaje aviso">
+      Su cuenta todavía no tiene un rol asignado. Pida al administrador que le asigne uno
+      (Auxiliar de bodega, Coordinador logístico o Transportador) y vuelva a iniciar sesión.
     </div>
 
-    <div class="indicadores">
-      <a class="indicador" th:href="@{/existencias}">
-        <div class="valor" th:classappend="${!#lists.isEmpty(bajoMinimo)} ? 'alerta'" th:text="${#lists.size(bajoMinimo)}">0</div>
-        <div class="nombre">Productos bajo el stock mínimo</div>
-      </a>
-      <a class="indicador" th:href="@{/ordenes-compra/(estado='PENDIENTE')}">
-        <div class="valor" th:text="${ordenesPendientes}">0</div>
-        <div class="nombre">Órdenes de compra por recibir</div>
-      </a>
-      <a class="indicador" th:href="@{/despachos/(estado='DESPACHADO')}">
-        <div class="valor" th:text="${despachosEnTransito}">0</div>
-        <div class="nombre">Despachos en tránsito</div>
-      </a>
-    </div>
+    <!-- Administrador, coordinador y auxiliar de bodega -->
+    <th:block th:if="${permisos.bodega}">
+      <div class="flujo">
+        <span class="paso">Proveedor</span> → <span class="paso">Entrada</span> →
+        <span class="paso">Bodega</span> ⇄ <span class="paso">Transferencia</span> →
+        <span class="paso">Despacho</span> → <span class="paso">Cliente</span>
+      </div>
 
-    <h2>Productos por reabastecer</h2>
-    <div class="tabla-contenedor">
-      <table>
-        <thead>
-          <tr><th>Código</th><th>Producto</th><th class="num">Stock total</th><th class="num">Mínimo</th>
-              <th class="num">Sugerido comprar</th></tr>
-        </thead>
-        <tbody>
-          <tr th:each="r : ${bajoMinimo}">
-            <td th:text="${r.codigo}"></td>
-            <td th:text="${r.nombre}"></td>
-            <td class="num"><span class="etiqueta mal" th:text="${r.total + ' ' + r.unidadMedida}"></span></td>
-            <td class="num" th:text="${r.stockMinimo}"></td>
-            <td class="num" th:text="${r.sugeridoComprar}"></td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(bajoMinimo)}">
-            <td colspan="5" class="vacio">Todos los productos están sobre su stock mínimo.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p th:if="${!#lists.isEmpty(bajoMinimo)}">
-      <a class="boton" th:href="@{/ordenes-compra/crear}">Crear orden de compra</a>
-    </p>
+      <div class="indicadores">
+        <a class="indicador" th:href="@{/existencias}">
+          <div class="valor" th:classappend="${!#lists.isEmpty(alertas)} ? 'alerta'" th:text="${#lists.size(alertas)}">0</div>
+          <div class="nombre">Alertas de stock mínimo</div>
+        </a>
+        <a class="indicador" th:href="@{/despachos/(estado='PENDIENTE')}">
+          <div class="valor" th:text="${pendientes}">0</div>
+          <div class="nombre">Despachos pendientes de salir</div>
+        </a>
+        <a class="indicador" th:href="@{/despachos/(estado='EN_RUTA')}">
+          <div class="valor" th:text="${enRuta}">0</div>
+          <div class="nombre">Despachos en ruta</div>
+        </a>
+      </div>
 
-    <h2>Últimos movimientos</h2>
-    <div class="tabla-contenedor">
-      <table>
-        <thead>
-          <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Bodega</th><th class="num">Cantidad</th><th>Referencia</th></tr>
-        </thead>
-        <tbody>
-          <tr th:each="m : ${ultimosMovimientos}">
-            <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-            <td><span th:class="${m.tipo == 'ENTRADA'} ? 'etiqueta ok' : 'etiqueta info'" th:text="${m.tipo}"></span></td>
-            <td th:text="${m.productoNombre}"></td>
-            <td th:text="${m.bodegaNombre}"></td>
-            <td class="num" th:text="${m.cantidad}"></td>
-            <td th:text="${m.referencia}"></td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(ultimosMovimientos)}">
-            <td colspan="6" class="vacio">Aún no hay movimientos. Registre y reciba una orden de compra para cargar inventario.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <h2>Alertas de stock mínimo</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr><th>Código</th><th>Producto</th><th class="num">Stock total</th><th class="num">Mínimo</th>
+                <th class="num">Sugerido reabastecer</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${alertas}">
+              <td th:text="${r.codigo}"></td>
+              <td th:text="${r.nombre}"></td>
+              <td class="num"><span class="etiqueta mal" th:text="${r.total + ' ' + r.unidadMedida}"></span></td>
+              <td class="num" th:text="${r.stockMinimo}"></td>
+              <td class="num" th:text="${r.sugeridoComprar}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(alertas)}">
+              <td colspan="5" class="vacio">Todos los productos están sobre su stock mínimo.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p th:if="${!#lists.isEmpty(alertas)}">
+        <a class="boton" th:href="@{/entradas/crear}">Registrar entrada de mercancía</a>
+      </p>
+
+      <h2>Últimos movimientos</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Producto</th><th>Bodega</th><th class="num">Cantidad</th><th>Referencia</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="m : ${ultimosMovimientos}">
+              <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+              <td><span th:replace="~{fragments/estados :: movimiento(${m.tipo})}"></span></td>
+              <td th:text="${m.concepto}"></td>
+              <td th:text="${m.productoNombre}"></td>
+              <td th:text="${m.bodegaNombre}"></td>
+              <td class="num" th:text="${m.cantidad}"></td>
+              <td th:text="${m.referencia}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(ultimosMovimientos)}">
+              <td colspan="7" class="vacio">Aún no hay movimientos. Registre una entrada de mercancía para cargar inventario.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </th:block>
+
+    <!-- Transportador -->
+    <th:block th:if="${permisos.soloTransportador}">
+      <div class="indicadores">
+        <a class="indicador" th:href="@{/despachos/(estado='PENDIENTE')}">
+          <div class="valor" th:text="${pendientes}">0</div>
+          <div class="nombre">Mis despachos por recoger</div>
+        </a>
+        <a class="indicador" th:href="@{/despachos/(estado='EN_RUTA')}">
+          <div class="valor" th:text="${enRuta}">0</div>
+          <div class="nombre">Mis despachos en ruta</div>
+        </a>
+      </div>
+      <h2>En ruta: registre la entrega o la devolución</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead><tr><th>Número</th><th>Cliente</th><th>Dirección</th><th></th></tr></thead>
+          <tbody>
+            <tr th:each="d : ${misDespachos}">
+              <td th:text="${d.numero}"></td>
+              <td th:text="${d.clienteNombre}"></td>
+              <td th:text="${d.direccionEntrega}"></td>
+              <td><a th:href="@{/despachos/{id}(id=${d.despachoId})}">Abrir</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(misDespachos)}">
+              <td colspan="4" class="vacio">No tiene despachos en ruta.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </th:block>
   </main>
 </body>
 </html>

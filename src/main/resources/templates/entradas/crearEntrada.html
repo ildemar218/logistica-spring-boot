@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crear orden de compra</title>
+  <title>Registrar entrada</title>
   <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
 <body class="app">
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
-    <h1>Crear orden de compra</h1>
-    <p class="subtitulo">La orden queda PENDIENTE. El stock aumenta cuando se registra la recepción de la mercancía.</p>
+    <h1>Registrar entrada de mercancía</h1>
+    <p class="subtitulo">Mercancía recibida de un proveedor. Al guardar, el stock de la bodega aumenta.</p>
 
-    <form class="formulario ancho" th:action="@{/ordenes-compra/crear}" th:object="${ordenDto}" method="post">
+    <form class="formulario ancho" th:action="@{/entradas/crear}" th:object="${entradaDto}" method="post">
       <div class="mensaje mal" th:if="${#fields.hasErrors('*')}">
         <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
       </div>
@@ -22,12 +22,8 @@
         <input id="numero" th:field="*{numero}" maxlength="20" required>
       </div>
       <div class="campo">
-        <label for="fecha">Fecha</label>
+        <label for="fecha">Fecha de recepción</label>
         <input id="fecha" type="date" th:field="*{fecha}" required>
-      </div>
-      <div class="campo">
-        <label for="fechaEntregaEsperada">Entrega esperada</label>
-        <input id="fechaEntregaEsperada" type="date" th:field="*{fechaEntregaEsperada}">
       </div>
       <div class="campo">
         <label for="proveedorId">Proveedor</label>
@@ -38,7 +34,7 @@
         </select>
       </div>
       <div class="campo">
-        <label for="bodegaId">Bodega de destino</label>
+        <label for="bodegaId">Bodega que recibe</label>
         <select id="bodegaId" th:field="*{bodegaId}" required>
           <option value="">Seleccione...</option>
           <option th:each="b : ${bodegas}" th:value="${b.bodegaId}"
@@ -46,12 +42,16 @@
         </select>
       </div>
       <div class="campo">
+        <label for="documentoProveedor">Factura o remisión del proveedor</label>
+        <input id="documentoProveedor" th:field="*{documentoProveedor}" maxlength="40">
+      </div>
+      <div class="campo">
         <label for="observacion">Observación</label>
         <input id="observacion" th:field="*{observacion}" maxlength="255">
       </div>
 
       <div class="ancho-completo">
-        <h2>Productos</h2>
+        <h2>Productos recibidos</h2>
         <div class="tabla-contenedor">
           <table id="detalle" class="detalle" data-precio="costo">
             <thead>
@@ -59,7 +59,7 @@
                   <th class="num">Subtotal</th><th></th></tr>
             </thead>
             <tbody>
-              <tr class="fila" th:each="d, st : ${ordenDto.detalles}">
+              <tr class="fila" th:each="d, st : ${entradaDto.detalles}">
                 <td><select class="producto" th:name="|detalles[${st.index}].productoId|"
                             th:attr="data-selected=${d.productoId}" required></select></td>
                 <td><input class="cantidad" type="number" min="1" step="1" required
@@ -78,17 +78,15 @@
           </table>
         </div>
         <p><button type="button" class="boton secundario" id="agregarFila">+ Agregar producto</button></p>
-        <p class="subtitulo">Los importes definitivos los calcula el servidor al guardar.</p>
       </div>
 
       <div class="acciones">
-        <button class="boton" type="submit">Guardar orden</button>
-        <a class="boton secundario" th:href="@{/ordenes-compra/}">Cancelar</a>
+        <button class="boton" type="submit">Registrar entrada</button>
+        <a class="boton secundario" th:href="@{/entradas/}">Cancelar</a>
       </div>
     </form>
   </main>
 
-  <!-- Auxiliares para el script: no se envían con el formulario -->
   <template id="plantillaFila">
     <tr class="fila">
       <td><select class="producto" name="detalles[0].productoId" required></select></td>

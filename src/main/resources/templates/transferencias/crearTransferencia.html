@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar transferencia</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Transferir mercancía entre bodegas</h1>
+    <p class="subtitulo">La mercancía sale de la bodega de origen y entra a la de destino en la misma operación.</p>
+
+    <form class="formulario ancho" th:action="@{/transferencias/crear}" th:object="${transferenciaDto}" method="post">
+      <div class="mensaje mal" th:if="${#fields.hasErrors('*')}">
+        <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
+      </div>
+
+      <div class="campo">
+        <label for="numero">Número</label>
+        <input id="numero" th:field="*{numero}" maxlength="20" required>
+      </div>
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" th:field="*{fecha}" required>
+      </div>
+      <div class="campo">
+        <label for="bodegaOrigenId">Bodega de origen</label>
+        <select id="bodegaOrigenId" th:field="*{bodegaOrigenId}" required>
+          <option value="">Seleccione...</option>
+          <option th:each="b : ${bodegas}" th:value="${b.bodegaId}" th:text="${b.codigo + ' - ' + b.nombre}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="bodegaDestinoId">Bodega de destino</label>
+        <select id="bodegaDestinoId" th:field="*{bodegaDestinoId}" required>
+          <option value="">Seleccione...</option>
+          <option th:each="b : ${bodegas}" th:value="${b.bodegaId}" th:text="${b.codigo + ' - ' + b.nombre}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="responsable">Responsable del traslado</label>
+        <input id="responsable" th:field="*{responsable}" maxlength="100">
+      </div>
+      <div class="campo">
+        <label for="observacion">Observación</label>
+        <input id="observacion" th:field="*{observacion}" maxlength="255">
+      </div>
+
+      <div class="ancho-completo">
+        <h2>Productos</h2>
+        <div class="tabla-contenedor">
+          <table id="detalle" class="detalle" data-precio="" data-bodega="bodegaOrigenId">
+            <thead><tr><th>Producto</th><th class="col-disponible">Disponible en origen</th><th class="col-cantidad">Cantidad</th><th></th></tr></thead>
+            <tbody>
+              <tr class="fila" th:each="d, st : ${transferenciaDto.detalles}">
+                <td><select class="producto" th:name="|detalles[${st.index}].productoId|"
+                            th:attr="data-selected=${d.productoId}" required></select></td>
+                <td class="col-disponible">—</td>
+                <td><input class="cantidad" type="number" min="1" step="1" required
+                           th:name="|detalles[${st.index}].cantidad|" th:value="${d.cantidad}"></td>
+                <td><button type="button" class="enlace-peligro quitar">Quitar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p><button type="button" class="boton secundario" id="agregarFila">+ Agregar producto</button></p>
+      </div>
+
+      <div class="acciones">
+        <button class="boton" type="submit">Registrar transferencia</button>
+        <a class="boton secundario" th:href="@{/transferencias/}">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <template id="plantillaFila">
+    <tr class="fila">
+      <td><select class="producto" name="detalles[0].productoId" required></select></td>
+      <td class="col-disponible">—</td>
+      <td><input class="cantidad" type="number" min="1" step="1" value="1" name="detalles[0].cantidad" required></td>
+      <td><button type="button" class="enlace-peligro quitar">Quitar</button></td>
+    </tr>
+  </template>
+  <select id="opcProductos" hidden disabled>
+    <option th:each="p : ${productos}" th:value="${p.productoId}"
+            th:text="${p.codigo + ' - ' + p.nombre + ' (' + p.unidadMedida + ')'}"></option>
+  </select>
+  <script th:inline="javascript">window.STOCK = /*[[${stock}]]*/ {};</script>
+  <script th:src="@{/js/detalle.js}"></script>
+</body>
+</html>

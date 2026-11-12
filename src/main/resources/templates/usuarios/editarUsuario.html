@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editar usuario</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1 th:text="${'Usuario ' + usuario.login}">Usuario</h1>
+    <p class="subtitulo" th:text="${usuario.nombreCompleto + ' — ' + usuario.email}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <form class="formulario" th:action="@{/usuarios/editar/{id}(id=${usuario.id})}" method="post">
+      <div class="campo ancho-completo">
+        <label>Roles</label>
+        <label class="opcion" th:each="r : ${rolesAsignables}">
+          <input type="checkbox" name="roles" th:value="${r}" th:checked="${#lists.contains(usuario.roles, r)}">
+          <span th:text="${etiquetaRol.apply(r)}"></span>
+        </label>
+      </div>
+      <div class="campo ancho-completo">
+        <label class="opcion">
+          <input type="checkbox" name="enabled" value="true" th:checked="${usuario.enabled}">
+          <span>Cuenta activa (puede iniciar sesión)</span>
+        </label>
+      </div>
+      <div class="acciones">
+        <button class="boton" type="submit">Guardar</button>
+        <a class="boton secundario" th:href="@{/usuarios/}">Cancelar</a>
+      </div>
+    </form>
+
+    <h2>Qué puede hacer cada rol</h2>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Rol</th><th>Permisos</th></tr></thead>
+        <tbody>
+          <tr><td>Administrador</td><td>Todo el sistema, incluida la gestión de usuarios y roles.</td></tr>
+          <tr><td>Coordinador logístico</td><td>Catálogos, entradas, salidas, transferencias, órdenes de despacho (crear, asignar, cancelar), inventario y reportes. Puede anular entradas y salidas.</td></tr>
+          <tr><td>Auxiliar de bodega</td><td>Consulta catálogos; registra entradas, salidas y transferencias; despacha la mercancía (pasa a EN RUTA); consulta inventario y reportes.</td></tr>
+          <tr><td>Transportador</td><td>Solo ve los despachos que tiene asignados y registra la entrega o la devolución.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

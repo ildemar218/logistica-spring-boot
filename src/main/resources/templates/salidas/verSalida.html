@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salida</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1 th:text="${'Salida ' + salida.numero}">Salida</h1>
+      <a class="boton secundario" th:href="@{/salidas/}">Volver al listado</a>
+    </div>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <dl class="ficha">
+      <div><dt>Estado</dt><dd><span th:replace="~{fragments/estados :: documento(${salida.estado})}"></span></dd></div>
+      <div><dt>Fecha</dt><dd th:text="${#temporals.format(salida.fecha, 'dd/MM/yyyy')}"></dd></div>
+      <div><dt>Tipo</dt><dd th:text="${#strings.replace(salida.tipo, '_', ' ')}"></dd></div>
+      <div><dt>Bodega</dt><dd th:text="${salida.bodegaNombre}"></dd></div>
+      <div><dt>Cliente</dt><dd th:text="${salida.clienteNombre ?: '—'}"></dd></div>
+      <div><dt>Registrada por</dt><dd th:text="${salida.usuario}"></dd></div>
+      <div><dt>Motivo</dt><dd th:text="${salida.motivo}"></dd></div>
+    </dl>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+        <tbody>
+          <tr th:each="d : ${salida.detalles}">
+            <td th:text="${d.productoCodigo}"></td>
+            <td th:text="${d.productoNombre}"></td>
+            <td class="num" th:text="${d.cantidad + ' ' + d.unidadMedida}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="acciones" th:if="${salida.estado == 'REGISTRADA' and permisos.anular}">
+      <form th:action="@{/salidas/{id}/anular(id=${salida.salidaId})}" method="post"
+            onsubmit="return confirm('¿Anular la salida? La mercancía volverá a la bodega.')">
+        <button class="boton peligro" type="submit">Anular salida</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

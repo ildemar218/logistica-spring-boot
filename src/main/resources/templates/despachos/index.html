@@ -10,17 +10,19 @@
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
     <div class="titulo-pagina">
-      <h1>Despachos</h1>
-      <a class="boton" th:href="@{/despachos/crear}">Crear despacho</a>
+      <h1 th:text="${permisos.soloTransportador} ? 'Mis despachos' : 'Órdenes de despacho'">Despachos</h1>
+      <a class="boton" th:if="${permisos.gestionDespachos}" th:href="@{/despachos/crear}">Crear orden de despacho</a>
     </div>
 
     <form class="buscador" th:action="@{/despachos/}" method="get">
-      <label for="estado">Estado</label>
+      <label for="estado">Estado de entrega</label>
       <select id="estado" name="estado">
         <option value="">Todos</option>
-        <option value="DESPACHADO" th:selected="${estado == 'DESPACHADO'}">En tránsito</option>
+        <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
+        <option value="EN_RUTA" th:selected="${estado == 'EN_RUTA'}">En ruta</option>
         <option value="ENTREGADO" th:selected="${estado == 'ENTREGADO'}">Entregado</option>
-        <option value="ANULADO" th:selected="${estado == 'ANULADO'}">Anulado</option>
+        <option value="DEVUELTO" th:selected="${estado == 'DEVUELTO'}">Devuelto</option>
+        <option value="CANCELADO" th:selected="${estado == 'CANCELADO'}">Cancelado</option>
       </select>
       <button class="boton" type="submit">Filtrar</button>
     </form>
@@ -30,8 +32,8 @@
     <div class="tabla-contenedor">
       <table>
         <thead>
-          <tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Bodega origen</th><th>Transportista</th>
-              <th>Estado</th><th class="num">Total</th><th>Acciones</th></tr>
+          <tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Bodega</th><th>Transportador</th>
+              <th>Estado</th><th class="num">Total</th><th></th></tr>
         </thead>
         <tbody>
           <tr th:each="d : ${despachos}">
@@ -39,7 +41,7 @@
             <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy')}"></td>
             <td th:text="${d.clienteNombre}"></td>
             <td th:text="${d.bodegaNombre}"></td>
-            <td th:text="${d.transportista}"></td>
+            <td th:text="${d.transportadorNombre}"></td>
             <td><span th:replace="~{fragments/estados :: despacho(${d.estado})}"></span></td>
             <td class="num" th:text="${#numbers.formatDecimal(d.total, 1, 'POINT', 2, 'COMMA')}"></td>
             <td><a th:href="@{/despachos/{id}(id=${d.despachoId})}">Ver</a></td>

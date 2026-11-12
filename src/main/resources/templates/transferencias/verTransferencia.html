@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transferencia</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main th:with="ids=${transferencia.detalles.![productoId]}">
+    <div class="titulo-pagina">
+      <h1 th:text="${'Transferencia ' + transferencia.numero}">Transferencia</h1>
+      <a class="boton secundario" th:href="@{/transferencias/}">Volver al listado</a>
+    </div>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+
+    <dl class="ficha">
+      <div><dt>Fecha</dt><dd th:text="${#temporals.format(transferencia.fecha, 'dd/MM/yyyy')}"></dd></div>
+      <div><dt>Origen</dt><dd th:text="${transferencia.bodegaOrigenNombre}"></dd></div>
+      <div><dt>Destino</dt><dd th:text="${transferencia.bodegaDestinoNombre}"></dd></div>
+      <div><dt>Responsable</dt><dd th:text="${transferencia.responsable ?: '—'}"></dd></div>
+      <div><dt>Registrada por</dt><dd th:text="${transferencia.usuario}"></dd></div>
+      <div><dt>Observación</dt><dd th:text="${transferencia.observacion ?: '—'}"></dd></div>
+    </dl>
+
+    <h2>Productos transferidos</h2>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+        <tbody>
+          <tr th:each="d : ${transferencia.detalles}">
+            <td th:text="${d.productoCodigo}"></td>
+            <td th:text="${d.productoNombre}"></td>
+            <td class="num" th:text="${d.cantidad + ' ' + d.unidadMedida}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Existencias actuales de estos productos</h2>
+    <div class="indicadores">
+      <div>
+        <p><strong th:text="${'Origen: ' + transferencia.bodegaOrigenNombre}"></strong></p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+            <tbody>
+              <tr th:each="e : ${stockOrigen}" th:if="${#lists.contains(ids, e.productoId)}">
+                <td th:text="${e.productoNombre}"></td>
+                <td class="num" th:text="${e.cantidad + ' ' + e.unidadMedida}"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <p><strong th:text="${'Destino: ' + transferencia.bodegaDestinoNombre}"></strong></p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+            <tbody>
+              <tr th:each="e : ${stockDestino}" th:if="${#lists.contains(ids, e.productoId)}">
+                <td th:text="${e.productoNombre}"></td>
+                <td class="num" th:text="${e.cantidad + ' ' + e.unidadMedida}"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p><a th:href="@{/movimientos}">Ver los movimientos en el kardex</a></p>
+  </main>
+</body>
+</html>

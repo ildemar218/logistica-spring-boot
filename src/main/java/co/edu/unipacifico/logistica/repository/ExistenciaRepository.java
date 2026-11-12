@@ -12,16 +12,21 @@ import org.springframework.data.repository.query.Param;
 public interface ExistenciaRepository extends JpaRepository<Existencia, Long> {
 
     /**
-     * Bloquea la fila mientras dura la transacción: si dos despachos descuentan el mismo
-     * producto a la vez, el segundo espera al primero y nunca se vende más de lo que hay.
+     * Bloquea la fila mientras dura la transacción: si dos operaciones descuentan el mismo
+     * producto a la vez, la segunda espera a la primera y nunca sale más de lo que hay.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Existencia e where e.producto.productoId = :productoId and e.bodega.bodegaId = :bodegaId")
     Optional<Existencia> bloquear(@Param("productoId") Long productoId, @Param("bodegaId") Long bodegaId);
 
+    @Query("select e from Existencia e where e.producto.productoId = :productoId and e.bodega.bodegaId = :bodegaId")
+    Optional<Existencia> consultar(@Param("productoId") Long productoId, @Param("bodegaId") Long bodegaId);
+
+    /** Existencias con filtros opcionales por bodega y producto. */
     @Query("select e from Existencia e where (:bodegaId is null or e.bodega.bodegaId = :bodegaId) "
+            + "and (:productoId is null or e.producto.productoId = :productoId) "
             + "order by e.bodega.nombre, e.producto.nombre")
-    List<Existencia> listarPorBodega(@Param("bodegaId") Long bodegaId);
+    List<Existencia> buscar(@Param("bodegaId") Long bodegaId, @Param("productoId") Long productoId);
 
     /** Total de unidades de cada producto sumando todas las bodegas: [productoId, total]. */
     @Query("select e.producto.productoId, sum(e.cantidad) from Existencia e group by e.producto.productoId")

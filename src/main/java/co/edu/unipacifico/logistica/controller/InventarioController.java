@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/** Consultas de inventario: solo lectura. El stock cambia con órdenes de compra y despachos. */
+/** Consulta de inventario por producto y bodega, y kardex. Solo lectura. */
 @Controller
 public class InventarioController {
 
@@ -24,11 +24,14 @@ public class InventarioController {
     }
 
     @GetMapping({"/existencias", "/existencias/"})
-    public String existencias(@RequestParam(required = false) Long bodegaId, Model model) {
+    public String existencias(@RequestParam(required = false) Long bodegaId,
+                              @RequestParam(required = false) Long productoId, Model model) {
         model.addAttribute("resumen", inventarioService.resumen());
-        model.addAttribute("existencias", inventarioService.existencias(bodegaId));
+        model.addAttribute("existencias", inventarioService.existencias(bodegaId, productoId));
         model.addAttribute("bodegas", bodegaService.listar());
+        model.addAttribute("productos", productoService.listar());
         model.addAttribute("bodegaId", bodegaId);
+        model.addAttribute("productoId", productoId);
         return "inventario/existencias";
     }
 

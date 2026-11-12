@@ -10,7 +10,7 @@
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
     <h1>Kardex de inventario</h1>
-    <p class="subtitulo">Historial de entradas y salidas, con el saldo que quedó en la bodega después de cada movimiento.</p>
+    <p class="subtitulo">Historial de entradas y salidas, con el saldo que quedó en la bodega después de cada movimiento. Para filtrar por fechas y exportar, use <a th:href="@{/reportes/movimientos}">Reportes</a>.</p>
 
     <form class="buscador" th:action="@{/movimientos}" method="get">
       <label for="productoId">Filtrar por producto y bodega</label>
@@ -30,13 +30,14 @@
     <div class="tabla-contenedor">
       <table>
         <thead>
-          <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Bodega</th><th class="num">Cantidad</th>
+          <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Producto</th><th>Bodega</th><th class="num">Cantidad</th>
               <th class="num">Saldo</th><th>Referencia</th><th>Usuario</th></tr>
         </thead>
         <tbody>
           <tr th:each="m : ${movimientos}">
             <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-            <td><span th:class="${m.tipo == 'ENTRADA'} ? 'etiqueta ok' : 'etiqueta info'" th:text="${m.tipo}"></span></td>
+            <td><span th:replace="~{fragments/estados :: movimiento(${m.tipo})}"></span></td>
+            <td th:text="${#strings.replace(m.concepto, '_', ' ')}"></td>
             <td th:text="${m.productoCodigo + ' - ' + m.productoNombre}"></td>
             <td th:text="${m.bodegaNombre}"></td>
             <td class="num" th:text="${(m.tipo == 'ENTRADA' ? '+' : '−') + m.cantidad}"></td>
@@ -45,7 +46,7 @@
             <td th:text="${m.usuario}"></td>
           </tr>
           <tr th:if="${#lists.isEmpty(movimientos)}">
-            <td colspan="8" class="vacio">No hay movimientos para mostrar.</td>
+            <td colspan="9" class="vacio">No hay movimientos para mostrar.</td>
           </tr>
         </tbody>
       </table>

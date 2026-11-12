@@ -35,3 +35,6 @@ build/
 
 ### Variables locales ###
 .env
+
+### Respaldo local con datos reales (incluye hashes de contraseñas) ###
+sql/logistica_respaldo.sql

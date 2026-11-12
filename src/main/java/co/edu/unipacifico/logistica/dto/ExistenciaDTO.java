@@ -1,5 +1,6 @@
 package co.edu.unipacifico.logistica.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /** Fila de la consulta de existencias: un producto en una bodega. */
@@ -12,6 +13,8 @@ public class ExistenciaDTO {
     private Long bodegaId;
     private String bodegaNombre;
     private Integer cantidad;
+    private Integer stockMinimo;
+    private BigDecimal costoUnitario;
     private LocalDateTime fechaActualizacion;
 
     public Long getProductoId() { return productoId; }
@@ -28,6 +31,14 @@ public class ExistenciaDTO {
     public void setBodegaNombre(String bodegaNombre) { this.bodegaNombre = bodegaNombre; }
     public Integer getCantidad() { return cantidad; }
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    public Integer getStockMinimo() { return stockMinimo; }
+    public void setStockMinimo(Integer stockMinimo) { this.stockMinimo = stockMinimo; }
+    public BigDecimal getCostoUnitario() { return costoUnitario; }
+    public void setCostoUnitario(BigDecimal costoUnitario) { this.costoUnitario = costoUnitario; }
+    /** Valor del inventario de esta fila a precio de compra. */
+    public BigDecimal getValorTotal() {
+        return costoUnitario == null || cantidad == null ? BigDecimal.ZERO : costoUnitario.multiply(BigDecimal.valueOf(cantidad));
+    }
     public LocalDateTime getFechaActualizacion() { return fechaActualizacion; }
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
 }

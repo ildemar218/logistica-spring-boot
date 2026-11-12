@@ -9,8 +9,8 @@
 <body class="app">
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
-    <h1>Crear despacho</h1>
-    <p class="subtitulo">Al guardar se descuenta el stock de la bodega de origen. Si un producto no alcanza, no se guarda nada.</p>
+    <h1>Crear orden de despacho</h1>
+    <p class="subtitulo">La orden queda PENDIENTE. El stock se descuenta cuando la mercancía sale de la bodega (estado EN RUTA). Si hoy no hay existencias suficientes, la orden se rechaza.</p>
 
     <form class="formulario ancho" th:action="@{/despachos/crear}" th:object="${despachoDto}" method="post">
       <div class="mensaje mal" th:if="${#fields.hasErrors('*')}">
@@ -47,8 +47,17 @@
         <input id="direccionEntrega" th:field="*{direccionEntrega}" maxlength="200" required>
       </div>
       <div class="campo">
-        <label for="transportista">Transportista</label>
-        <input id="transportista" th:field="*{transportista}" maxlength="100">
+        <label for="transportadorId">Transportador asignado</label>
+        <select id="transportadorId" th:field="*{transportadorId}" required>
+          <option value="">Seleccione...</option>
+          <option th:each="t : ${transportadores}" th:value="${t.id}" th:text="${t.nombreCompleto}"></option>
+        </select>
+        <span class="error" th:if="${#lists.isEmpty(transportadores)}">
+          No hay usuarios con rol Transportador. El administrador debe asignarlo en Usuarios.</span>
+      </div>
+      <div class="campo">
+        <label for="vehiculo">Vehículo (placa)</label>
+        <input id="vehiculo" th:field="*{vehiculo}" maxlength="20">
       </div>
       <div class="campo">
         <label for="numeroGuia">Número de guía</label>
@@ -92,7 +101,7 @@
       </div>
 
       <div class="acciones">
-        <button class="boton" type="submit">Guardar despacho</button>
+        <button class="boton" type="submit">Crear orden de despacho</button>
         <a class="boton secundario" th:href="@{/despachos/}">Cancelar</a>
       </div>
     </form>

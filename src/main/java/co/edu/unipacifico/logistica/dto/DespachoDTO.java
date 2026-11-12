@@ -34,8 +34,11 @@ public class DespachoDTO {
     @Size(max = 200, message = "Dirección: máximo 200 caracteres")
     private String direccionEntrega;
 
-    @Size(max = 100, message = "Transportista: máximo 100 caracteres")
-    private String transportista;
+    @NotNull(message = "Asigne el transportador")
+    private Long transportadorId;
+
+    @Size(max = 20, message = "Vehículo: máximo 20 caracteres")
+    private String vehiculo;
 
     @Size(max = 40, message = "Guía: máximo 40 caracteres")
     private String numeroGuia;
@@ -51,6 +54,11 @@ public class DespachoDTO {
     private String clienteNombre;
     private String bodegaNombre;
     private String estado;
+    private String transportadorNombre;
+    private String transportadorLogin;
+    private String motivoDevolucion;
+    private LocalDateTime fechaSalida;
+    private List<SeguimientoDTO> seguimiento = new ArrayList<>();
     private BigDecimal subtotal;
     private BigDecimal iva;
     private BigDecimal total;
@@ -68,8 +76,20 @@ public class DespachoDTO {
     public void setBodegaId(Long bodegaId) { this.bodegaId = bodegaId; }
     public String getDireccionEntrega() { return direccionEntrega; }
     public void setDireccionEntrega(String direccionEntrega) { this.direccionEntrega = direccionEntrega; }
-    public String getTransportista() { return transportista; }
-    public void setTransportista(String transportista) { this.transportista = transportista; }
+    public Long getTransportadorId() { return transportadorId; }
+    public void setTransportadorId(Long transportadorId) { this.transportadorId = transportadorId; }
+    public String getVehiculo() { return vehiculo; }
+    public void setVehiculo(String vehiculo) { this.vehiculo = vehiculo; }
+    public String getTransportadorNombre() { return transportadorNombre; }
+    public void setTransportadorNombre(String transportadorNombre) { this.transportadorNombre = transportadorNombre; }
+    public String getTransportadorLogin() { return transportadorLogin; }
+    public void setTransportadorLogin(String transportadorLogin) { this.transportadorLogin = transportadorLogin; }
+    public String getMotivoDevolucion() { return motivoDevolucion; }
+    public void setMotivoDevolucion(String motivoDevolucion) { this.motivoDevolucion = motivoDevolucion; }
+    public LocalDateTime getFechaSalida() { return fechaSalida; }
+    public void setFechaSalida(LocalDateTime fechaSalida) { this.fechaSalida = fechaSalida; }
+    public List<SeguimientoDTO> getSeguimiento() { return seguimiento; }
+    public void setSeguimiento(List<SeguimientoDTO> seguimiento) { this.seguimiento = seguimiento; }
     public String getNumeroGuia() { return numeroGuia; }
     public void setNumeroGuia(String numeroGuia) { this.numeroGuia = numeroGuia; }
     public String getObservacion() { return observacion; }

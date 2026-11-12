@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salidas</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Salidas de mercancía</h1>
+      <a class="boton" th:href="@{/salidas/crear}">Registrar salida</a>
+    </div>
+    <p class="subtitulo">Las salidas por despacho a clientes se gestionan en <a th:href="@{/despachos/}">Despachos</a>.</p>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Número</th><th>Fecha</th><th>Tipo</th><th>Bodega</th><th>Cliente</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="s : ${salidas}">
+            <td th:text="${s.numero}"></td>
+            <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy')}"></td>
+            <td th:text="${#strings.replace(s.tipo, '_', ' ')}"></td>
+            <td th:text="${s.bodegaNombre}"></td>
+            <td th:text="${s.clienteNombre ?: '—'}"></td>
+            <td th:text="${s.motivo}"></td>
+            <td><span th:replace="~{fragments/estados :: documento(${s.estado})}"></span></td>
+            <td><a th:href="@{/salidas/{id}(id=${s.salidaId})}">Ver</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(salidas)}"><td colspan="8" class="vacio">No hay salidas registradas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

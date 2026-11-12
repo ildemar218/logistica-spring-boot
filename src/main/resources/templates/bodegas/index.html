@@ -11,7 +11,7 @@
   <main>
     <div class="titulo-pagina">
       <h1>Bodegas</h1>
-      <a class="boton" th:href="@{/bodegas/crear}">Crear bodega</a>
+      <a class="boton" th:if="${permisos.editarCatalogos}" th:href="@{/bodegas/crear}">Crear bodega</a>
     </div>
 
     <form class="buscador" th:action="@{/bodegas/}" method="get">
@@ -27,7 +27,7 @@
     <div class="tabla-contenedor">
     <table>
       <thead>
-        <tr><th>Código</th><th>Nombre</th><th>Ciudad</th><th>Responsable</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Código</th><th>Nombre</th><th>Ciudad</th><th>Responsable</th><th>Teléfono</th><th>Estado</th><th th:if="${permisos.editarCatalogos}">Acciones</th></tr>
       </thead>
       <tbody>
         <tr th:each="x : ${bodegas}">
@@ -37,7 +37,7 @@
           <td th:text="${x.responsable}"></td>
           <td th:text="${x.telefono}"></td>
           <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
-          <td class="acciones-fila">
+          <td class="acciones-fila" th:if="${permisos.editarCatalogos}">
             <a th:href="@{/bodegas/editar/{id}(id=${x.bodegaId})}">Editar</a>
             <form th:action="@{/bodegas/eliminar/{id}(id=${x.bodegaId})}" method="post"
                   onsubmit="return confirm('¿Eliminar esta bodega?')">

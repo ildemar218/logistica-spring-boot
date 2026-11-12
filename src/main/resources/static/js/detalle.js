@@ -1,9 +1,10 @@
 /*
- * Filas dinámicas del detalle (órdenes de compra y despachos).
+ * Filas dinámicas del detalle (entradas, salidas, transferencias y despachos).
  * - Agregar / quitar filas y renumerar los nombres detalles[i].campo para que Spring los reciba.
- * - Al elegir un producto, propone el valor unitario (costo o precio de venta).
- * - Muestra un total estimado. El servidor siempre recalcula los importes al guardar.
- * - En despachos, muestra el stock disponible del producto en la bodega elegida.
+ * - Si el formulario tiene precios: propone el valor unitario y muestra un total estimado
+ *   (el servidor siempre recalcula los importes al guardar).
+ * - Si hay stock (window.STOCK): muestra lo disponible en la bodega elegida y lo marca en rojo
+ *   cuando la cantidad pedida lo supera.
  */
 (function () {
   var tabla = document.getElementById('detalle');
@@ -12,9 +13,9 @@
   var cuerpo = tabla.querySelector('tbody');
   var plantilla = document.getElementById('plantillaFila');
   var opciones = document.getElementById('opcProductos');
-  var atributoPrecio = tabla.getAttribute('data-precio');      // "costo" o "venta"
-  var selBodega = document.getElementById('bodegaId');
-  var stock = window.STOCK || null;                           // solo en despachos
+  var atributoPrecio = tabla.getAttribute('data-precio');        // "costo", "venta" o vacío (sin precios)
+  var selBodega = document.getElementById(tabla.getAttribute('data-bodega') || 'bodegaId');
+  var stock = window.STOCK || null;
   var TASA_IVA = 0.19;
   var formato = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -39,32 +40,34 @@
     return porProducto[productoId] || 0;
   }
 
-  function actualizarFila(fila) {
-    var sel = fila.querySelector('.producto');
-    var celdaDisp = fila.querySelector('.col-disponible');
-    if (celdaDisp) {
-      var d = disponible(sel.value);
-      celdaDisp.textContent = d === null ? '—' : d;
-      var cantidad = parseInt(fila.querySelector('.cantidad').value, 10) || 0;
-      celdaDisp.style.color = d !== null && cantidad > d ? '#f87171' : '';
-    }
-    var cant = parseFloat(fila.querySelector('.cantidad').value) || 0;
-    var valor = parseFloat(fila.querySelector('.valor').value) || 0;
-    fila.querySelector('.subtotal').textContent = formato.format(cant * valor);
+  function numero(fila, clase) {
+    var campo = fila.querySelector(clase);
+    return campo ? (parseFloat(campo.value) || 0) : 0;
   }
 
-  function actualizarTotales() {
+  function actualizarTodo() {
     var subtotal = 0;
     Array.prototype.forEach.call(cuerpo.querySelectorAll('tr.fila'), function (fila) {
-      actualizarFila(fila);
-      var cant = parseFloat(fila.querySelector('.cantidad').value) || 0;
-      var valor = parseFloat(fila.querySelector('.valor').value) || 0;
-      subtotal += cant * valor;
+      var celdaDisp = fila.querySelector('.col-disponible');
+      if (celdaDisp) {
+        var d = disponible(fila.querySelector('.producto').value);
+        celdaDisp.textContent = d === null ? '—' : d;
+        celdaDisp.style.color = d !== null && numero(fila, '.cantidad') > d ? '#f87171' : '';
+      }
+      var celdaSub = fila.querySelector('.subtotal');
+      if (celdaSub) {
+        var s = numero(fila, '.cantidad') * numero(fila, '.valor');
+        celdaSub.textContent = formato.format(s);
+        subtotal += s;
+      }
     });
-    var iva = Math.round(subtotal * TASA_IVA * 100) / 100;
-    document.getElementById('estSubtotal').textContent = formato.format(subtotal);
-    document.getElementById('estIva').textContent = formato.format(iva);
-    document.getElementById('estTotal').textContent = formato.format(subtotal + iva);
+    var estSubtotal = document.getElementById('estSubtotal');
+    if (estSubtotal) {
+      var iva = Math.round(subtotal * TASA_IVA * 100) / 100;
+      estSubtotal.textContent = formato.format(subtotal);
+      document.getElementById('estIva').textContent = formato.format(iva);
+      document.getElementById('estTotal').textContent = formato.format(subtotal + iva);
+    }
   }
 
   function renumerar() {
@@ -79,18 +82,20 @@
     var sel = fila.querySelector('.producto');
     sel.addEventListener('change', function () {
       var o = sel.options[sel.selectedIndex];
-      if (o && o.value) {
-        fila.querySelector('.valor').value = o.getAttribute('data-' + atributoPrecio);
+      var valor = fila.querySelector('.valor');
+      if (atributoPrecio && valor && o && o.value) {
+        valor.value = o.getAttribute('data-' + atributoPrecio);
       }
-      actualizarTotales();
+      actualizarTodo();
     });
-    fila.querySelector('.cantidad').addEventListener('input', actualizarTotales);
-    fila.querySelector('.valor').addEventListener('input', actualizarTotales);
+    Array.prototype.forEach.call(fila.querySelectorAll('.cantidad, .valor'), function (campo) {
+      campo.addEventListener('input', actualizarTodo);
+    });
     fila.querySelector('.quitar').addEventListener('click', function () {
       if (cuerpo.querySelectorAll('tr.fila').length === 1) { return; }  // siempre queda una fila
       fila.remove();
       renumerar();
-      actualizarTotales();
+      actualizarTodo();
     });
   }
 
@@ -105,10 +110,10 @@
     renumerar();
     llenarProductos(fila);
     enlazar(fila);
-    actualizarTotales();
+    actualizarTodo();
   });
 
-  if (selBodega) { selBodega.addEventListener('change', actualizarTotales); }
+  if (selBodega) { selBodega.addEventListener('change', actualizarTodo); }
 
   // Despachos: al elegir el cliente, propone su dirección como dirección de entrega.
   var selCliente = document.getElementById('clienteId');
@@ -122,5 +127,14 @@
     });
   }
 
-  actualizarTotales();
+  // Salidas: el cliente solo aplica a las ventas.
+  var selTipo = document.getElementById('tipo');
+  var campoCliente = document.getElementById('campoCliente');
+  if (selTipo && campoCliente) {
+    var alternar = function () { campoCliente.hidden = selTipo.value !== 'VENTA'; };
+    selTipo.addEventListener('change', alternar);
+    alternar();
+  }
+
+  actualizarTodo();
 })();

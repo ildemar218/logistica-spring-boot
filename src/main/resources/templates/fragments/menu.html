@@ -1,22 +1,36 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!-- Menú común de las páginas internas. Se incluye con th:replace="~{fragments/menu :: menu}" -->
+<!-- Menú común de las páginas internas. Muestra solo los módulos que el rol del usuario puede usar. -->
 <header class="barra" th:fragment="menu">
   <a class="marca" th:href="@{/principal}">Logística</a>
   <nav>
-    <span class="grupo">Catálogos</span>
-    <a th:href="@{/proveedores/}">Proveedores</a>
-    <a th:href="@{/clientes/}">Clientes</a>
-    <a th:href="@{/categorias/}">Categorías</a>
-    <a th:href="@{/productos/}">Productos</a>
-    <a th:href="@{/bodegas/}">Bodegas</a>
-    <span class="grupo">Operación</span>
-    <a th:href="@{/ordenes-compra/}">Órdenes de compra</a>
-    <a th:href="@{/despachos/}">Despachos</a>
-    <span class="grupo">Inventario</span>
-    <a th:href="@{/existencias}">Existencias</a>
-    <a th:href="@{/movimientos}">Kardex</a>
+    <th:block th:if="${permisos.bodega}">
+      <span class="grupo">Catálogos</span>
+      <a th:href="@{/productos/}">Productos</a>
+      <a th:href="@{/bodegas/}">Bodegas</a>
+      <a th:href="@{/proveedores/}">Proveedores</a>
+      <a th:href="@{/clientes/}">Clientes</a>
+      <a th:href="@{/categorias/}">Categorías</a>
+      <span class="grupo">Operación</span>
+      <a th:href="@{/entradas/}">Entradas</a>
+      <a th:href="@{/salidas/}">Salidas</a>
+      <a th:href="@{/transferencias/}">Transferencias</a>
+    </th:block>
+    <th:block th:if="${permisos.verDespachos}">
+      <span class="grupo" th:unless="${permisos.bodega}">Operación</span>
+      <a th:href="@{/despachos/}" th:text="${permisos.soloTransportador} ? 'Mis despachos' : 'Despachos'">Despachos</a>
+    </th:block>
+    <th:block th:if="${permisos.bodega}">
+      <span class="grupo">Control</span>
+      <a th:href="@{/existencias}">Inventario</a>
+      <a th:href="@{/movimientos}">Kardex</a>
+      <a th:href="@{/reportes/}">Reportes</a>
+    </th:block>
+    <th:block th:if="${permisos.admin}">
+      <span class="grupo">Administración</span>
+      <a th:href="@{/usuarios/}">Usuarios</a>
+    </th:block>
   </nav>
   <div class="usuario">
     <span th:text="${usuarioActual}">usuario</span>

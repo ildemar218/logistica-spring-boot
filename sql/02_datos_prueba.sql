@@ -1,5 +1,5 @@
 -- Datos de prueba opcionales. Ejecutar después de 01_esquema.sql.
--- Las existencias empiezan en cero: el stock entra al recibir órdenes de compra.
+-- Las existencias empiezan en cero: el stock entra al registrar entradas de mercancía.
 USE logistica;
 
 INSERT IGNORE INTO categorias (nombre, descripcion, estado) VALUES
@@ -27,3 +27,22 @@ INSERT IGNORE INTO productos (codigo, nombre, descripcion, categoria_id, unidad_
 SELECT 'DET-1K', 'Detergente 1 kg', 'Detergente en polvo', categoria_id, 'KG', 6200.00, 8500.00, 20, 200, TRUE, NOW(), NOW() FROM categorias WHERE nombre = 'Aseo';
 INSERT IGNORE INTO productos (codigo, nombre, descripcion, categoria_id, unidad_medida, precio_compra, precio_venta, stock_minimo, stock_maximo, estado, fecha_creacion, fecha_actualizacion)
 SELECT 'RES-CAR', 'Resma papel carta', 'Resma de 500 hojas', categoria_id, 'PAQ', 14000.00, 18500.00, 10, 100, TRUE, NOW(), NOW() FROM categorias WHERE nombre = 'Papelería';
+
+-- Bodega adicional para probar transferencias.
+INSERT IGNORE INTO bodegas (codigo, nombre, ciudad, direccion, responsable, telefono, estado) VALUES
+  ('BOD-TUM', 'Bodega Tumaco', 'Tumaco', 'Vía al puerto km 2', 'Responsable Tumaco', '6027270000', TRUE);
+
+-- Usuarios de demostración, uno por rol. Contraseña de todos: Demo2026*
+-- Son solo para pruebas locales: cámbielos o bórrelos en un entorno real.
+INSERT IGNORE INTO usuarios (login, nombre, apellido, email, password, enabled) VALUES
+  ('admin', 'Ana', 'Administradora', 'admin@logistica.test', '$2a$10$EXfTQRUfD3LwDEJKs9ChuOwHlSBgfTbfQ1NkXd6gf3LOjAt/ckqNe', TRUE),
+  ('coordinador', 'Carlos', 'Coordinador', 'coordinador@logistica.test', '$2a$10$EXfTQRUfD3LwDEJKs9ChuOwHlSBgfTbfQ1NkXd6gf3LOjAt/ckqNe', TRUE),
+  ('auxiliar', 'Beatriz', 'Auxiliar', 'auxiliar@logistica.test', '$2a$10$EXfTQRUfD3LwDEJKs9ChuOwHlSBgfTbfQ1NkXd6gf3LOjAt/ckqNe', TRUE),
+  ('transportador', 'Tomás', 'Transportador', 'transportador@logistica.test', '$2a$10$EXfTQRUfD3LwDEJKs9ChuOwHlSBgfTbfQ1NkXd6gf3LOjAt/ckqNe', TRUE);
+
+INSERT IGNORE INTO usuarios_roles (usuario_id, rol_id)
+SELECT u.id, r.id FROM usuarios u JOIN rol r ON
+  (u.login = 'admin' AND r.nombre = 'ROLE_ADMIN') OR
+  (u.login = 'coordinador' AND r.nombre = 'ROLE_COORDINADOR') OR
+  (u.login = 'auxiliar' AND r.nombre = 'ROLE_AUXILIAR_BODEGA') OR
+  (u.login = 'transportador' AND r.nombre = 'ROLE_TRANSPORTADOR');

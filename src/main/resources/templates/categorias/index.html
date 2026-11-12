@@ -11,7 +11,7 @@
   <main>
     <div class="titulo-pagina">
       <h1>Categorías</h1>
-      <a class="boton" th:href="@{/categorias/crear}">Crear categoría</a>
+      <a class="boton" th:if="${permisos.editarCatalogos}" th:href="@{/categorias/crear}">Crear categoría</a>
     </div>
 
     <form class="buscador" th:action="@{/categorias/}" method="get">
@@ -27,14 +27,14 @@
     <div class="tabla-contenedor">
     <table>
       <thead>
-        <tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th th:if="${permisos.editarCatalogos}">Acciones</th></tr>
       </thead>
       <tbody>
         <tr th:each="x : ${categorias}">
           <td th:text="${x.nombre}"></td>
           <td th:text="${x.descripcion}"></td>
           <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
-          <td class="acciones-fila">
+          <td class="acciones-fila" th:if="${permisos.editarCatalogos}">
             <a th:href="@{/categorias/editar/{id}(id=${x.categoriaId})}">Editar</a>
             <form th:action="@{/categorias/eliminar/{id}(id=${x.categoriaId})}" method="post"
                   onsubmit="return confirm('¿Eliminar esta categoría?')">

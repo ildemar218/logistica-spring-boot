@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "detalle_orden_compra")
-public class DetalleOrdenCompra {
+@Table(name = "detalle_entrada")
+public class DetalleEntrada {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,8 +13,8 @@ public class DetalleOrdenCompra {
     private Long detalleId;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "orden_id")
-    private OrdenCompra orden;
+    @JoinColumn(name = "entrada_id")
+    private Entrada entrada;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "producto_id")
@@ -30,8 +30,8 @@ public class DetalleOrdenCompra {
     private BigDecimal subtotal;
 
     public Long getDetalleId() { return detalleId; }
-    public OrdenCompra getOrden() { return orden; }
-    public void setOrden(OrdenCompra orden) { this.orden = orden; }
+    public Entrada getEntrada() { return entrada; }
+    public void setEntrada(Entrada entrada) { this.entrada = entrada; }
     public Producto getProducto() { return producto; }
     public void setProducto(Producto producto) { this.producto = producto; }
     public Integer getCantidad() { return cantidad; }

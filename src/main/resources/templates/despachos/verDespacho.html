@@ -10,7 +10,7 @@
   <header th:replace="~{fragments/menu :: menu}"></header>
   <main>
     <div class="titulo-pagina">
-      <h1 th:text="${'Despacho ' + despacho.numero}">Despacho</h1>
+      <h1 th:text="${'Orden de despacho ' + despacho.numero}">Despacho</h1>
       <a class="boton secundario" th:href="@{/despachos/}">Volver al listado</a>
     </div>
 
@@ -20,22 +20,71 @@
     <dl class="ficha">
       <div><dt>Estado</dt><dd><span th:replace="~{fragments/estados :: despacho(${despacho.estado})}"></span></dd></div>
       <div><dt>Fecha</dt><dd th:text="${#temporals.format(despacho.fecha, 'dd/MM/yyyy')}"></dd></div>
+      <div><dt>Cliente</dt><dd th:text="${despacho.clienteNombre}"></dd></div>
+      <div><dt>Dirección de entrega</dt><dd th:text="${despacho.direccionEntrega}"></dd></div>
+      <div><dt>Bodega de origen</dt><dd th:text="${despacho.bodegaNombre}"></dd></div>
+      <div><dt>Transportador</dt><dd th:text="${despacho.transportadorNombre}"></dd></div>
+      <div><dt>Vehículo</dt><dd th:text="${despacho.vehiculo ?: '—'}"></dd></div>
+      <div><dt>Número de guía</dt><dd th:text="${despacho.numeroGuia ?: '—'}"></dd></div>
+      <div><dt>Salió de bodega</dt>
+        <dd th:text="${despacho.fechaSalida != null} ? ${#temporals.format(despacho.fechaSalida, 'dd/MM/yyyy HH:mm')} : '—'"></dd></div>
       <div><dt>Entregado</dt>
         <dd th:text="${despacho.fechaEntrega != null} ? ${#temporals.format(despacho.fechaEntrega, 'dd/MM/yyyy HH:mm')} : '—'"></dd></div>
-      <div><dt>Cliente</dt><dd th:text="${despacho.clienteNombre}"></dd></div>
-      <div><dt>Bodega de origen</dt><dd th:text="${despacho.bodegaNombre}"></dd></div>
-      <div><dt>Dirección de entrega</dt><dd th:text="${despacho.direccionEntrega}"></dd></div>
-      <div><dt>Transportista</dt><dd th:text="${despacho.transportista != null} ? ${despacho.transportista} : '—'"></dd></div>
-      <div><dt>Número de guía</dt><dd th:text="${despacho.numeroGuia != null} ? ${despacho.numeroGuia} : '—'"></dd></div>
-      <div><dt>Observación</dt><dd th:text="${despacho.observacion != null} ? ${despacho.observacion} : '—'"></dd></div>
+      <div th:if="${despacho.motivoDevolucion}"><dt>Motivo de devolución</dt><dd th:text="${despacho.motivoDevolucion}"></dd></div>
+      <div><dt>Observación</dt><dd th:text="${despacho.observacion ?: '—'}"></dd></div>
     </dl>
 
+    <!-- Acciones según estado y rol -->
+    <div class="acciones">
+      <th:block th:if="${despacho.estado == 'PENDIENTE'}">
+        <form th:if="${permisos.despachar}" th:action="@{/despachos/{id}/despachar(id=${despacho.despachoId})}" method="post"
+              onsubmit="return confirm('¿Confirmar la salida de bodega? Se descontará el stock.')">
+          <button class="boton" type="submit">Despachar (sale de bodega → EN RUTA)</button>
+        </form>
+        <form th:if="${permisos.gestionDespachos}" th:action="@{/despachos/{id}/cancelar(id=${despacho.despachoId})}" method="post"
+              onsubmit="return confirm('¿Cancelar la orden de despacho?')">
+          <input type="hidden" name="motivo" value="Cancelado por el coordinador">
+          <button class="boton peligro" type="submit">Cancelar despacho</button>
+        </form>
+      </th:block>
+      <th:block th:if="${despacho.estado == 'EN_RUTA' and permisos.entregar}">
+        <form th:action="@{/despachos/{id}/entregar(id=${despacho.despachoId})}" method="post"
+              onsubmit="return confirm('¿Confirmar que el cliente recibió la mercancía?')">
+          <input type="hidden" name="observacion" value="">
+          <button class="boton exito" type="submit">Marcar como entregado</button>
+        </form>
+      </th:block>
+    </div>
+
+    <form th:if="${despacho.estado == 'EN_RUTA' and permisos.entregar}" class="formulario"
+          th:action="@{/despachos/{id}/devolver(id=${despacho.despachoId})}" method="post">
+      <div class="campo ancho-completo">
+        <label for="motivo">¿El cliente no recibió la mercancía? Motivo de la devolución</label>
+        <input id="motivo" name="motivo" maxlength="255" required placeholder="Ej.: dirección no encontrada, cliente ausente">
+      </div>
+      <div class="acciones"><button class="boton peligro" type="submit">Registrar devolución</button></div>
+    </form>
+
+    <form th:if="${despacho.estado == 'PENDIENTE' and permisos.gestionDespachos}" class="formulario"
+          th:action="@{/despachos/{id}/asignar(id=${despacho.despachoId})}" method="post">
+      <div class="campo">
+        <label for="transportadorId">Reasignar transportador</label>
+        <select id="transportadorId" name="transportadorId" required>
+          <option th:each="t : ${transportadores}" th:value="${t.id}" th:text="${t.nombreCompleto}"
+                  th:selected="${t.id == despacho.transportadorId}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="vehiculo">Vehículo (placa)</label>
+        <input id="vehiculo" name="vehiculo" maxlength="20" th:value="${despacho.vehiculo}">
+      </div>
+      <div class="acciones"><button class="boton secundario" type="submit">Guardar asignación</button></div>
+    </form>
+
+    <h2>Productos</h2>
     <div class="tabla-contenedor">
       <table>
-        <thead>
-          <tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th>
-              <th class="num">Precio unitario</th><th class="num">Subtotal</th></tr>
-        </thead>
+        <thead><tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th><th class="num">Precio unitario</th><th class="num">Subtotal</th></tr></thead>
         <tbody>
           <tr th:each="d : ${despacho.detalles}">
             <td th:text="${d.productoCodigo}"></td>
@@ -46,25 +95,26 @@
           </tr>
         </tbody>
         <tfoot>
-          <tr><td colspan="4" class="num">Subtotal</td>
-              <td class="num" th:text="${#numbers.formatDecimal(despacho.subtotal, 1, 'POINT', 2, 'COMMA')}"></td></tr>
-          <tr><td colspan="4" class="num">IVA 19 %</td>
-              <td class="num" th:text="${#numbers.formatDecimal(despacho.iva, 1, 'POINT', 2, 'COMMA')}"></td></tr>
-          <tr><td colspan="4" class="num">Total</td>
-              <td class="num" th:text="${#numbers.formatDecimal(despacho.total, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">Subtotal</td><td class="num" th:text="${#numbers.formatDecimal(despacho.subtotal, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">IVA 19 %</td><td class="num" th:text="${#numbers.formatDecimal(despacho.iva, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">Total</td><td class="num" th:text="${#numbers.formatDecimal(despacho.total, 1, 'POINT', 2, 'COMMA')}"></td></tr>
         </tfoot>
       </table>
     </div>
 
-    <div class="acciones" th:if="${despacho.estado == 'DESPACHADO'}">
-      <form th:action="@{/despachos/{id}/entregar(id=${despacho.despachoId})}" method="post"
-            onsubmit="return confirm('¿Confirmar que el cliente recibió la mercancía?')">
-        <button class="boton exito" type="submit">Marcar como entregado</button>
-      </form>
-      <form th:action="@{/despachos/{id}/anular(id=${despacho.despachoId})}" method="post"
-            onsubmit="return confirm('¿Anular el despacho? La mercancía volverá a la bodega.')">
-        <button class="boton peligro" type="submit">Anular despacho</button>
-      </form>
+    <h2>Seguimiento de la entrega</h2>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Fecha</th><th>Estado</th><th>Usuario</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr th:each="s : ${despacho.seguimiento}">
+            <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            <td><span th:replace="~{fragments/estados :: despacho(${s.estado})}"></span></td>
+            <td th:text="${s.usuario}"></td>
+            <td th:text="${s.observacion}"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </main>
 </body>

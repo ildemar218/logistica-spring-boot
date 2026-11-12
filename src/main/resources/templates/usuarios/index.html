@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuarios</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Usuarios y roles</h1>
+    <p class="subtitulo">Los usuarios nuevos se registran sin rol. Asígneles uno para que puedan trabajar.</p>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Login</th><th>Nombre</th><th>Correo</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="u : ${usuarios}">
+            <td th:text="${u.login}"></td>
+            <td th:text="${u.nombreCompleto}"></td>
+            <td th:text="${u.email}"></td>
+            <td>
+              <span th:each="r : ${u.roles}" th:class="${r == 'ROLE_USER'} ? 'etiqueta aviso' : 'etiqueta info'"
+                    th:text="${etiquetaRol.apply(r)}" style="margin-right:4px"></span>
+            </td>
+            <td><span th:class="${u.enabled} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${u.enabled} ? 'Activo' : 'Inactivo'"></span></td>
+            <td><a th:href="@{/usuarios/editar/{id}(id=${u.id})}">Editar roles</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

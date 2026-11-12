@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reportes</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Reportes</h1>
+    <p class="subtitulo">Cada reporte se puede filtrar, imprimir o guardar como PDF, y exportar a Excel (CSV).</p>
+    <div class="indicadores">
+      <a class="indicador" th:href="@{/reportes/movimientos}">
+        <div class="valor">⇅</div>
+        <div class="nombre"><strong>Movimientos de inventario</strong><br>
+          Entradas y salidas por rango de fechas, bodega, producto, tipo y concepto.</div>
+      </a>
+      <a class="indicador" th:href="@{/reportes/inventario}">
+        <div class="valor">▦</div>
+        <div class="nombre"><strong>Inventario disponible</strong><br>
+          Existencias por bodega y producto, valorizadas a costo, con alertas de stock mínimo.</div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

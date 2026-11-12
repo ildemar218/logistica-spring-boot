@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acceso denegado</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="centrado">
+  <div class="tarjeta">
+    <h1>Acceso denegado</h1>
+    <p class="subtitulo">Su rol no tiene permiso para esta opción. Si la necesita, pida al administrador que le asigne el rol adecuado.</p>
+    <a class="boton" th:href="@{/principal}">Volver al tablero</a>
+  </div>
+</body>
+</html>

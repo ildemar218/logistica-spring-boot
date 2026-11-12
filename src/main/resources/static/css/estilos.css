@@ -233,6 +233,19 @@ tfoot td { font-weight: bold; background: #273449; }
 .flujo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 4px; color: var(--suave); font-size: 14px; }
 .flujo span.paso { background: var(--panel); border: 1px solid var(--borde); border-radius: 6px; padding: 6px 10px; color: var(--texto); }
 
+/* Casillas de verificación en línea (roles de usuario) */
+label.opcion { display: flex; align-items: center; gap: 8px; font-weight: normal; margin-bottom: 8px; }
+label.opcion input { width: auto; }
+
+/* Impresión de reportes: fondo blanco y sin menú ni filtros */
+@media print {
+    body, table, .tabla-contenedor, th, tfoot td { background: #fff !important; color: #000 !important; }
+    .barra, .no-imprimir { display: none !important; }
+    h1, h2 { color: #000; }
+    .etiqueta { border: 1px solid #000; background: none !important; color: #000 !important; }
+    main { max-width: none; padding: 0; }
+}
+
 @media (max-width: 640px) {
     main { padding: 16px; }
     .barra { padding: 12px 16px; }

@@ -3,13 +3,23 @@
 <body>
 <!-- Etiquetas de color para los estados de los documentos -->
 
-<span th:fragment="orden(valor)"
-      th:class="${valor == 'RECIBIDA'} ? 'etiqueta ok' : (${valor == 'ANULADA'} ? 'etiqueta apagada' : 'etiqueta aviso')"
-      th:text="${valor}">PENDIENTE</span>
+<!-- Entradas y salidas: REGISTRADA / ANULADA -->
+<span th:fragment="documento(valor)"
+      th:class="${valor == 'ANULADA'} ? 'etiqueta apagada' : 'etiqueta ok'"
+      th:text="${valor}">REGISTRADA</span>
 
+<!-- Despachos: PENDIENTE, EN_RUTA, ENTREGADO, DEVUELTO, CANCELADO -->
 <span th:fragment="despacho(valor)"
-      th:class="${valor == 'ENTREGADO'} ? 'etiqueta ok' : (${valor == 'ANULADO'} ? 'etiqueta apagada' : 'etiqueta info')"
-      th:text="${valor == 'DESPACHADO'} ? 'EN TRÁNSITO' : ${valor}">DESPACHADO</span>
+      th:class="${valor == 'ENTREGADO'} ? 'etiqueta ok'
+              : (${valor == 'EN_RUTA'} ? 'etiqueta info'
+              : (${valor == 'PENDIENTE'} ? 'etiqueta aviso'
+              : (${valor == 'DEVUELTO'} ? 'etiqueta mal' : 'etiqueta apagada')))"
+      th:text="${valor == 'EN_RUTA'} ? 'EN RUTA' : ${valor}">PENDIENTE</span>
+
+<!-- Movimientos del kardex: ENTRADA / SALIDA -->
+<span th:fragment="movimiento(valor)"
+      th:class="${valor == 'ENTRADA'} ? 'etiqueta ok' : 'etiqueta info'"
+      th:text="${valor}">ENTRADA</span>
 
 </body>
 </html>

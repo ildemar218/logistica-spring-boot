@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrada</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1 th:text="${'Entrada ' + entrada.numero}">Entrada</h1>
+      <a class="boton secundario" th:href="@{/entradas/}">Volver al listado</a>
+    </div>
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <dl class="ficha">
+      <div><dt>Estado</dt><dd><span th:replace="~{fragments/estados :: documento(${entrada.estado})}"></span></dd></div>
+      <div><dt>Fecha</dt><dd th:text="${#temporals.format(entrada.fecha, 'dd/MM/yyyy')}"></dd></div>
+      <div><dt>Proveedor</dt><dd th:text="${entrada.proveedorNombre}"></dd></div>
+      <div><dt>Bodega que recibió</dt><dd th:text="${entrada.bodegaNombre}"></dd></div>
+      <div><dt>Factura o remisión</dt><dd th:text="${entrada.documentoProveedor ?: '—'}"></dd></div>
+      <div><dt>Registrada por</dt><dd th:text="${entrada.usuario}"></dd></div>
+      <div><dt>Observación</dt><dd th:text="${entrada.observacion ?: '—'}"></dd></div>
+    </dl>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th><th class="num">Costo unitario</th><th class="num">Subtotal</th></tr></thead>
+        <tbody>
+          <tr th:each="d : ${entrada.detalles}">
+            <td th:text="${d.productoCodigo}"></td>
+            <td th:text="${d.productoNombre}"></td>
+            <td class="num" th:text="${d.cantidad}"></td>
+            <td class="num" th:text="${#numbers.formatDecimal(d.costoUnitario, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td class="num" th:text="${#numbers.formatDecimal(d.subtotal, 1, 'POINT', 2, 'COMMA')}"></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="4" class="num">Subtotal</td><td class="num" th:text="${#numbers.formatDecimal(entrada.subtotal, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">IVA 19 %</td><td class="num" th:text="${#numbers.formatDecimal(entrada.iva, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">Total</td><td class="num" th:text="${#numbers.formatDecimal(entrada.total, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="acciones" th:if="${entrada.estado == 'REGISTRADA' and permisos.anular}">
+      <form th:action="@{/entradas/{id}/anular(id=${entrada.entradaId})}" method="post"
+            onsubmit="return confirm('¿Anular la entrada? Se descontará la mercancía de la bodega.')">
+        <button class="boton peligro" type="submit">Anular entrada</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

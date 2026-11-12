@@ -11,7 +11,7 @@
   <main>
     <div class="titulo-pagina">
       <h1>Productos</h1>
-      <a class="boton" th:href="@{/productos/crear}">Crear producto</a>
+      <a class="boton" th:if="${permisos.editarCatalogos}" th:href="@{/productos/crear}">Crear producto</a>
     </div>
 
     <form class="buscador" th:action="@{/productos/}" method="get">
@@ -27,7 +27,7 @@
     <div class="tabla-contenedor">
     <table>
       <thead>
-        <tr><th>Código (SKU)</th><th>Nombre</th><th>Categoría</th><th>Unidad de medida</th><th>Precio de venta</th><th>Stock mínimo</th><th>Stock máximo</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Código (SKU)</th><th>Nombre</th><th>Categoría</th><th>Unidad de medida</th><th>Precio de venta</th><th>Stock mínimo</th><th>Stock máximo</th><th>Estado</th><th th:if="${permisos.editarCatalogos}">Acciones</th></tr>
       </thead>
       <tbody>
         <tr th:each="x : ${productos}">
@@ -39,7 +39,7 @@
           <td class="num" th:text="${x.stockMinimo}"></td>
           <td class="num" th:text="${x.stockMaximo}"></td>
           <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
-          <td class="acciones-fila">
+          <td class="acciones-fila" th:if="${permisos.editarCatalogos}">
             <a th:href="@{/productos/editar/{id}(id=${x.productoId})}">Editar</a>
             <form th:action="@{/productos/eliminar/{id}(id=${x.productoId})}" method="post"
                   onsubmit="return confirm('¿Eliminar este producto?')">

@@ -2,8 +2,11 @@ package co.edu.unipacifico.logistica.mapper;
 
 import co.edu.unipacifico.logistica.dto.DespachoDTO;
 import co.edu.unipacifico.logistica.dto.DetalleDespachoDTO;
+import co.edu.unipacifico.logistica.dto.SeguimientoDTO;
 import co.edu.unipacifico.logistica.model.Despacho;
 import co.edu.unipacifico.logistica.model.DetalleDespacho;
+import co.edu.unipacifico.logistica.model.SeguimientoDespacho;
+import co.edu.unipacifico.logistica.model.Usuarios;
 import org.springframework.stereotype.Component;
 
 /** Convierte el despacho guardado en el DTO que muestran las vistas. El despacho se arma en el servicio. */
@@ -20,28 +23,39 @@ public class DespachoMapper {
         d.setBodegaId(e.getBodega().getBodegaId());
         d.setBodegaNombre(e.getBodega().getNombre());
         d.setDireccionEntrega(e.getDireccionEntrega());
-        d.setTransportista(e.getTransportista());
+        Usuarios t = e.getTransportador();
+        d.setTransportadorId(t.getId());
+        d.setTransportadorLogin(t.getLogin());
+        d.setTransportadorNombre(nombre(t));
+        d.setVehiculo(e.getVehiculo());
         d.setNumeroGuia(e.getNumeroGuia());
         d.setObservacion(e.getObservacion());
+        d.setMotivoDevolucion(e.getMotivoDevolucion());
         d.setEstado(e.getEstado());
         d.setSubtotal(e.getSubtotal());
         d.setIva(e.getIva());
         d.setTotal(e.getTotal());
+        d.setFechaSalida(e.getFechaSalida());
         d.setFechaEntrega(e.getFechaEntrega());
         for (DetalleDespacho det : e.getDetalles()) {
-            d.getDetalles().add(toDTO(det));
+            DetalleDespachoDTO dd = new DetalleDespachoDTO();
+            dd.setProductoId(det.getProducto().getProductoId());
+            dd.setProductoCodigo(det.getProducto().getCodigo());
+            dd.setProductoNombre(det.getProducto().getNombre());
+            dd.setCantidad(det.getCantidad());
+            dd.setPrecioUnitario(det.getPrecioUnitario());
+            dd.setSubtotal(det.getSubtotal());
+            d.getDetalles().add(dd);
+        }
+        for (SeguimientoDespacho s : e.getSeguimiento()) {
+            d.getSeguimiento().add(new SeguimientoDTO(s.getFecha(), s.getEstado(), s.getUsuario(), s.getObservacion()));
         }
         return d;
     }
 
-    private DetalleDespachoDTO toDTO(DetalleDespacho e) {
-        DetalleDespachoDTO d = new DetalleDespachoDTO();
-        d.setProductoId(e.getProducto().getProductoId());
-        d.setProductoCodigo(e.getProducto().getCodigo());
-        d.setProductoNombre(e.getProducto().getNombre());
-        d.setCantidad(e.getCantidad());
-        d.setPrecioUnitario(e.getPrecioUnitario());
-        d.setSubtotal(e.getSubtotal());
-        return d;
+    public static String nombre(Usuarios u) {
+        String n = ((u.getNombre() == null ? "" : u.getNombre()) + " "
+                + (u.getApellido() == null ? "" : u.getApellido())).trim();
+        return n.isEmpty() ? u.getLogin() : n;
     }
 }
