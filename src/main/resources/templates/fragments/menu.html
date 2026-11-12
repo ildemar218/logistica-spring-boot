@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!-- Menú común de las páginas internas. Muestra solo los módulos que el rol del usuario puede usar. -->
+<!-- Menú común de las páginas internas. Muestra solo los módulos que el rol del usuario puede usar.
+     Las opciones se agrupan (catálogos, operación, control, administración) con un separador entre grupos. -->
 <header class="barra" th:fragment="menu">
   <a class="marca" th:href="@{/principal}">Logística</a>
-  <nav>
-    <th:block th:if="${permisos.bodega}">
-      <span class="grupo">Catálogos</span>
+  <nav aria-label="Menú principal">
+    <div class="grupo-menu" th:if="${permisos.bodega}" aria-label="Catálogos">
       <a th:href="@{/productos/}">Productos</a>
       <a th:href="@{/bodegas/}">Bodegas</a>
       <a th:href="@{/proveedores/}">Proveedores</a>
       <a th:href="@{/clientes/}">Clientes</a>
       <a th:href="@{/categorias/}">Categorías</a>
-      <span class="grupo">Operación</span>
-      <a th:href="@{/entradas/}">Entradas</a>
-      <a th:href="@{/salidas/}">Salidas</a>
-      <a th:href="@{/transferencias/}">Transferencias</a>
-    </th:block>
-    <th:block th:if="${permisos.verDespachos}">
-      <span class="grupo" th:unless="${permisos.bodega}">Operación</span>
+    </div>
+    <div class="grupo-menu" th:if="${permisos.verDespachos}" aria-label="Operación">
+      <th:block th:if="${permisos.bodega}">
+        <a th:href="@{/entradas/}">Entradas</a>
+        <a th:href="@{/salidas/}">Salidas</a>
+        <a th:href="@{/transferencias/}">Transferencias</a>
+      </th:block>
       <a th:href="@{/despachos/}" th:text="${permisos.soloTransportador} ? 'Mis despachos' : 'Despachos'">Despachos</a>
-    </th:block>
-    <th:block th:if="${permisos.bodega}">
-      <span class="grupo">Control</span>
+    </div>
+    <div class="grupo-menu" th:if="${permisos.bodega}" aria-label="Control">
       <a th:href="@{/existencias}">Inventario</a>
       <a th:href="@{/movimientos}">Kardex</a>
       <a th:href="@{/reportes/}">Reportes</a>
-    </th:block>
-    <th:block th:if="${permisos.admin}">
-      <span class="grupo">Administración</span>
+    </div>
+    <div class="grupo-menu" th:if="${permisos.admin}" aria-label="Administración">
       <a th:href="@{/usuarios/}">Usuarios</a>
-    </th:block>
+    </div>
   </nav>
   <div class="usuario">
     <span th:text="${usuarioActual}">usuario</span>

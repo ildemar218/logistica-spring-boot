@@ -64,10 +64,13 @@ body.centrado {
 }
 
 .barra .marca { font-weight: bold; color: var(--acento); text-decoration: none; margin-right: 8px; }
-.barra nav { display: flex; flex-wrap: wrap; gap: 4px 14px; flex: 1; }
-.barra nav a { color: var(--texto); text-decoration: none; font-size: 14px; }
+.barra nav { display: flex; flex-wrap: wrap; align-items: center; row-gap: 6px; flex: 1; }
+/* Cada grupo de opciones queda unido; entre grupos hay una línea vertical. */
+.barra .grupo-menu { display: flex; flex-wrap: nowrap; align-items: center; gap: 14px; padding: 0 14px; }
+.barra .grupo-menu + .grupo-menu { border-left: 1px solid var(--borde); }
+.barra .grupo-menu:first-child { padding-left: 0; }
+.barra nav a { color: var(--texto); text-decoration: none; font-size: 14px; white-space: nowrap; }
 .barra nav a:hover { color: var(--acento); }
-.barra .grupo { color: var(--suave); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
 .barra .usuario { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--suave); }
 .barra .usuario form { margin: 0; }
 
