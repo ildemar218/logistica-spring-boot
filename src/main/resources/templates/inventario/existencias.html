@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Existencias</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Existencias</h1>
+    <p class="subtitulo">El stock aumenta al recibir órdenes de compra y disminuye con los despachos.</p>
+
+    <h2>Nivel de stock por producto (todas las bodegas)</h2>
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Producto</th><th class="num">Stock total</th><th class="num">Mínimo</th>
+              <th class="num">Máximo</th><th>Nivel</th><th class="num">Sugerido comprar</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${resumen}">
+            <td th:text="${r.codigo}"></td>
+            <td th:text="${r.nombre}"></td>
+            <td class="num" th:text="${r.total + ' ' + r.unidadMedida}"></td>
+            <td class="num" th:text="${r.stockMinimo}"></td>
+            <td class="num" th:text="${r.stockMaximo}"></td>
+            <td><span th:class="${r.nivel == 'BAJO'} ? 'etiqueta mal' : (${r.nivel == 'EXCESO'} ? 'etiqueta aviso' : 'etiqueta ok')"
+                      th:text="${r.nivel == 'BAJO'} ? 'Bajo mínimo' : (${r.nivel == 'EXCESO'} ? 'Sobre máximo' : 'Normal')"></span></td>
+            <td class="num" th:text="${r.sugeridoComprar > 0} ? ${r.sugeridoComprar} : '—'"></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(resumen)}">
+            <td colspan="7" class="vacio">No hay productos activos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Detalle por bodega</h2>
+    <form class="buscador" th:action="@{/existencias}" method="get">
+      <label for="bodegaId">Bodega</label>
+      <select id="bodegaId" name="bodegaId">
+        <option value="">Todas las bodegas</option>
+        <option th:each="b : ${bodegas}" th:value="${b.bodegaId}" th:text="${b.nombre}"
+                th:selected="${b.bodegaId == bodegaId}"></option>
+      </select>
+      <button class="boton" type="submit">Filtrar</button>
+    </form>
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Bodega</th><th>Código</th><th>Producto</th><th class="num">Cantidad</th><th>Última actualización</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="e : ${existencias}">
+            <td th:text="${e.bodegaNombre}"></td>
+            <td th:text="${e.productoCodigo}"></td>
+            <td th:text="${e.productoNombre}"></td>
+            <td class="num" th:text="${e.cantidad + ' ' + e.unidadMedida}"></td>
+            <td th:text="${e.fechaActualizacion != null} ? ${#temporals.format(e.fechaActualizacion, 'dd/MM/yyyy HH:mm')} : '—'"></td>
+            <td><a th:href="@{/movimientos(productoId=${e.productoId},bodegaId=${e.bodegaId})}">Ver kardex</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(existencias)}">
+            <td colspan="6" class="vacio">Sin existencias. Reciba una orden de compra para cargar inventario.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

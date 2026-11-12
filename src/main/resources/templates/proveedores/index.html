@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proveedores</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Proveedores</h1>
+      <a class="boton" th:href="@{/proveedores/crear}">Crear proveedor</a>
+    </div>
+
+    <form class="buscador" th:action="@{/proveedores/}" method="get">
+      <label for="filtro">Documento o razón social</label>
+      <input id="filtro" name="filtro" th:value="${filtro}">
+      <button class="boton" type="submit">Buscar</button>
+      <a class="boton secundario" th:if="${filtro}" th:href="@{/proveedores/}">Limpiar</a>
+    </form>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Tipo de documento</th><th>Número de documento</th><th>Razón social</th><th>Persona de contacto</th><th>Teléfono</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="x : ${proveedores}">
+          <td th:text="${x.tipoDocumento}"></td>
+          <td th:text="${x.numeroDocumento}"></td>
+          <td th:text="${x.razonSocial}"></td>
+          <td th:text="${x.contacto}"></td>
+          <td th:text="${x.telefono}"></td>
+          <td th:text="${x.ciudad}"></td>
+          <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
+          <td class="acciones-fila">
+            <a th:href="@{/proveedores/editar/{id}(id=${x.proveedorId})}">Editar</a>
+            <form th:action="@{/proveedores/eliminar/{id}(id=${x.proveedorId})}" method="post"
+                  onsubmit="return confirm('¿Eliminar este proveedor?')">
+              <button class="enlace-peligro" type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(proveedores)}">
+          <td colspan="8" class="vacio">No hay registros para mostrar.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </main>
+</body>
+</html>

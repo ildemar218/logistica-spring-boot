@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Etiquetas de color para los estados de los documentos -->
+
+<span th:fragment="orden(valor)"
+      th:class="${valor == 'RECIBIDA'} ? 'etiqueta ok' : (${valor == 'ANULADA'} ? 'etiqueta apagada' : 'etiqueta aviso')"
+      th:text="${valor}">PENDIENTE</span>
+
+<span th:fragment="despacho(valor)"
+      th:class="${valor == 'ENTREGADO'} ? 'etiqueta ok' : (${valor == 'ANULADO'} ? 'etiqueta apagada' : 'etiqueta info')"
+      th:text="${valor == 'DESPACHADO'} ? 'EN TRÁNSITO' : ${valor}">DESPACHADO</span>
+
+</body>
+</html>

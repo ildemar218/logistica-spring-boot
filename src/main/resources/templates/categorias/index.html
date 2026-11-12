@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categorías</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Categorías</h1>
+      <a class="boton" th:href="@{/categorias/crear}">Crear categoría</a>
+    </div>
+
+    <form class="buscador" th:action="@{/categorias/}" method="get">
+      <label for="filtro">Nombre o descripción</label>
+      <input id="filtro" name="filtro" th:value="${filtro}">
+      <button class="boton" type="submit">Buscar</button>
+      <a class="boton secundario" th:if="${filtro}" th:href="@{/categorias/}">Limpiar</a>
+    </form>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="x : ${categorias}">
+          <td th:text="${x.nombre}"></td>
+          <td th:text="${x.descripcion}"></td>
+          <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
+          <td class="acciones-fila">
+            <a th:href="@{/categorias/editar/{id}(id=${x.categoriaId})}">Editar</a>
+            <form th:action="@{/categorias/eliminar/{id}(id=${x.categoriaId})}" method="post"
+                  onsubmit="return confirm('¿Eliminar esta categoría?')">
+              <button class="enlace-peligro" type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(categorias)}">
+          <td colspan="4" class="vacio">No hay registros para mostrar.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </main>
+</body>
+</html>

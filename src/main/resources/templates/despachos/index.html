@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Despachos</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Despachos</h1>
+      <a class="boton" th:href="@{/despachos/crear}">Crear despacho</a>
+    </div>
+
+    <form class="buscador" th:action="@{/despachos/}" method="get">
+      <label for="estado">Estado</label>
+      <select id="estado" name="estado">
+        <option value="">Todos</option>
+        <option value="DESPACHADO" th:selected="${estado == 'DESPACHADO'}">En tránsito</option>
+        <option value="ENTREGADO" th:selected="${estado == 'ENTREGADO'}">Entregado</option>
+        <option value="ANULADO" th:selected="${estado == 'ANULADO'}">Anulado</option>
+      </select>
+      <button class="boton" type="submit">Filtrar</button>
+    </form>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Bodega origen</th><th>Transportista</th>
+              <th>Estado</th><th class="num">Total</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="d : ${despachos}">
+            <td th:text="${d.numero}"></td>
+            <td th:text="${#temporals.format(d.fecha, 'dd/MM/yyyy')}"></td>
+            <td th:text="${d.clienteNombre}"></td>
+            <td th:text="${d.bodegaNombre}"></td>
+            <td th:text="${d.transportista}"></td>
+            <td><span th:replace="~{fragments/estados :: despacho(${d.estado})}"></span></td>
+            <td class="num" th:text="${#numbers.formatDecimal(d.total, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td><a th:href="@{/despachos/{id}(id=${d.despachoId})}">Ver</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(despachos)}">
+            <td colspan="8" class="vacio">No hay despachos para mostrar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

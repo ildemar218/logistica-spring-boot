@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>No encontrado</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Registro no encontrado</h1>
+    <p class="mensaje aviso" th:text="${mensaje}">El registro solicitado no existe.</p>
+    <a class="boton secundario" th:href="@{/principal}">Volver al tablero</a>
+  </main>
+</body>
+</html>

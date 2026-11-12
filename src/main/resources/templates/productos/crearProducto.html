@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear producto</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Crear producto</h1>
+    <form class="formulario" th:action="@{/productos/crear}" th:object="${productoDto}" method="post">
+      <div class="mensaje mal" th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+      </div>
+    <div class="campo">
+      <label for="codigo">Código (SKU)</label>
+      <input id="codigo" type="text" th:field="*{codigo}" maxlength="30" required>
+      <span class="error" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></span>
+    </div>
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" th:field="*{nombre}" maxlength="120" required>
+      <span class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+    </div>
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <input id="descripcion" type="text" th:field="*{descripcion}" maxlength="255">
+      <span class="error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+    </div>
+    <div class="campo">
+      <label for="categoriaId">Categoría</label>
+      <select id="categoriaId" th:field="*{categoriaId}" required>
+        <option value="">Seleccione...</option>
+        <option th:each="o : ${categorias}" th:value="${o.categoriaId}" th:text="${o.nombre}"></option>
+      </select>
+      <span class="error" th:if="${#fields.hasErrors('categoriaId')}" th:errors="*{categoriaId}"></span>
+    </div>
+    <div class="campo">
+      <label for="unidadMedida">Unidad de medida</label>
+      <select id="unidadMedida" th:field="*{unidadMedida}" required>
+        <option value="">Seleccione...</option>
+        <option value="UND">Unidad</option>
+        <option value="KG">Kilogramo</option>
+        <option value="LT">Litro</option>
+        <option value="CAJA">Caja</option>
+        <option value="PAQ">Paquete</option>
+        <option value="M">Metro</option>
+      </select>
+      <span class="error" th:if="${#fields.hasErrors('unidadMedida')}" th:errors="*{unidadMedida}"></span>
+    </div>
+    <div class="campo">
+      <label for="precioCompra">Precio de compra</label>
+      <input id="precioCompra" type="number" step="0.01" min="0" th:field="*{precioCompra}" required>
+      <span class="error" th:if="${#fields.hasErrors('precioCompra')}" th:errors="*{precioCompra}"></span>
+    </div>
+    <div class="campo">
+      <label for="precioVenta">Precio de venta</label>
+      <input id="precioVenta" type="number" step="0.01" min="0" th:field="*{precioVenta}" required>
+      <span class="error" th:if="${#fields.hasErrors('precioVenta')}" th:errors="*{precioVenta}"></span>
+    </div>
+    <div class="campo">
+      <label for="stockMinimo">Stock mínimo</label>
+      <input id="stockMinimo" type="number" step="1" min="0" th:field="*{stockMinimo}" required>
+      <span class="error" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></span>
+    </div>
+    <div class="campo">
+      <label for="stockMaximo">Stock máximo</label>
+      <input id="stockMaximo" type="number" step="1" min="0" th:field="*{stockMaximo}" required>
+      <span class="error" th:if="${#fields.hasErrors('stockMaximo')}" th:errors="*{stockMaximo}"></span>
+    </div>
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" th:field="*{estado}">
+        <option th:value="true">Activo</option>
+        <option th:value="false">Inactivo</option>
+      </select>
+      <span class="error" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></span>
+    </div>
+    <div class="acciones">
+      <button class="boton" type="submit">Guardar</button>
+      <a class="boton secundario" th:href="@{/productos/}">Cancelar</a>
+    </div>
+    </form>
+  </main>
+</body>
+</html>

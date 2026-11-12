@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear despacho</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Crear despacho</h1>
+    <p class="subtitulo">Al guardar se descuenta el stock de la bodega de origen. Si un producto no alcanza, no se guarda nada.</p>
+
+    <form class="formulario ancho" th:action="@{/despachos/crear}" th:object="${despachoDto}" method="post">
+      <div class="mensaje mal" th:if="${#fields.hasErrors('*')}">
+        <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
+      </div>
+
+      <div class="campo">
+        <label for="numero">Número</label>
+        <input id="numero" th:field="*{numero}" maxlength="20" required>
+      </div>
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" th:field="*{fecha}" required>
+      </div>
+      <div class="campo">
+        <label for="clienteId">Cliente</label>
+        <select id="clienteId" th:field="*{clienteId}" required>
+          <option value="">Seleccione...</option>
+          <option th:each="c : ${clientes}" th:value="${c.clienteId}"
+                  th:attr="data-direccion=${(c.direccion ?: '') + (c.ciudad != null ? ', ' + c.ciudad : '')}"
+                  th:text="${c.numeroDocumento + ' - ' + c.nombres}"></option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="bodegaId">Bodega de origen</label>
+        <select id="bodegaId" th:field="*{bodegaId}" required>
+          <option value="">Seleccione...</option>
+          <option th:each="b : ${bodegas}" th:value="${b.bodegaId}"
+                  th:text="${b.codigo + ' - ' + b.nombre + ' (' + b.ciudad + ')'}"></option>
+        </select>
+      </div>
+      <div class="campo ancho-completo">
+        <label for="direccionEntrega">Dirección de entrega</label>
+        <input id="direccionEntrega" th:field="*{direccionEntrega}" maxlength="200" required>
+      </div>
+      <div class="campo">
+        <label for="transportista">Transportista</label>
+        <input id="transportista" th:field="*{transportista}" maxlength="100">
+      </div>
+      <div class="campo">
+        <label for="numeroGuia">Número de guía</label>
+        <input id="numeroGuia" th:field="*{numeroGuia}" maxlength="40">
+      </div>
+      <div class="campo">
+        <label for="observacion">Observación</label>
+        <input id="observacion" th:field="*{observacion}" maxlength="255">
+      </div>
+
+      <div class="ancho-completo">
+        <h2>Productos</h2>
+        <div class="tabla-contenedor">
+          <table id="detalle" class="detalle" data-precio="venta">
+            <thead>
+              <tr><th>Producto</th><th class="col-disponible">Disponible</th><th class="col-cantidad">Cantidad</th>
+                  <th class="col-valor">Precio unitario</th><th class="num">Subtotal</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr class="fila" th:each="d, st : ${despachoDto.detalles}">
+                <td><select class="producto" th:name="|detalles[${st.index}].productoId|"
+                            th:attr="data-selected=${d.productoId}" required></select></td>
+                <td class="col-disponible">—</td>
+                <td><input class="cantidad" type="number" min="1" step="1" required
+                           th:name="|detalles[${st.index}].cantidad|" th:value="${d.cantidad}"></td>
+                <td><input class="valor" type="number" min="0" step="0.01" required
+                           th:name="|detalles[${st.index}].precioUnitario|" th:value="${d.precioUnitario}"></td>
+                <td class="num subtotal">0,00</td>
+                <td><button type="button" class="enlace-peligro quitar">Quitar</button></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr><td colspan="4" class="num">Subtotal estimado</td><td class="num" id="estSubtotal">0,00</td><td></td></tr>
+              <tr><td colspan="4" class="num">IVA 19 %</td><td class="num" id="estIva">0,00</td><td></td></tr>
+              <tr><td colspan="4" class="num">Total estimado</td><td class="num" id="estTotal">0,00</td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <p><button type="button" class="boton secundario" id="agregarFila">+ Agregar producto</button></p>
+        <p class="subtitulo">«Disponible» es el stock del producto en la bodega elegida. El servidor vuelve a comprobarlo al guardar.</p>
+      </div>
+
+      <div class="acciones">
+        <button class="boton" type="submit">Guardar despacho</button>
+        <a class="boton secundario" th:href="@{/despachos/}">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <!-- Auxiliares para el script: no se envían con el formulario -->
+  <template id="plantillaFila">
+    <tr class="fila">
+      <td><select class="producto" name="detalles[0].productoId" required></select></td>
+      <td class="col-disponible">—</td>
+      <td><input class="cantidad" type="number" min="1" step="1" value="1" name="detalles[0].cantidad" required></td>
+      <td><input class="valor" type="number" min="0" step="0.01" name="detalles[0].precioUnitario" required></td>
+      <td class="num subtotal">0,00</td>
+      <td><button type="button" class="enlace-peligro quitar">Quitar</button></td>
+    </tr>
+  </template>
+  <select id="opcProductos" hidden disabled>
+    <option th:each="p : ${productos}" th:value="${p.productoId}"
+            th:text="${p.codigo + ' - ' + p.nombre + ' (' + p.unidadMedida + ')'}"
+            th:attr="data-costo=${p.precioCompra},data-venta=${p.precioVenta}"></option>
+  </select>
+  <script th:inline="javascript">
+    window.STOCK = /*[[${stock}]]*/ {};
+  </script>
+  <script th:src="@{/js/detalle.js}"></script>
+</body>
+</html>

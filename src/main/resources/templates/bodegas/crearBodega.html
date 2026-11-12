@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear bodega</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Crear bodega</h1>
+    <form class="formulario" th:action="@{/bodegas/crear}" th:object="${bodegaDto}" method="post">
+      <div class="mensaje mal" th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+      </div>
+    <div class="campo">
+      <label for="codigo">Código</label>
+      <input id="codigo" type="text" th:field="*{codigo}" maxlength="20" required>
+      <span class="error" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></span>
+    </div>
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" th:field="*{nombre}" maxlength="100" required>
+      <span class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+    </div>
+    <div class="campo">
+      <label for="ciudad">Ciudad</label>
+      <input id="ciudad" type="text" th:field="*{ciudad}" maxlength="80" required>
+      <span class="error" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></span>
+    </div>
+    <div class="campo">
+      <label for="direccion">Dirección</label>
+      <input id="direccion" type="text" th:field="*{direccion}" maxlength="200">
+      <span class="error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span>
+    </div>
+    <div class="campo">
+      <label for="responsable">Responsable</label>
+      <input id="responsable" type="text" th:field="*{responsable}" maxlength="100">
+      <span class="error" th:if="${#fields.hasErrors('responsable')}" th:errors="*{responsable}"></span>
+    </div>
+    <div class="campo">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" type="tel" th:field="*{telefono}" maxlength="30">
+      <span class="error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+    </div>
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" th:field="*{estado}">
+        <option th:value="true">Activo</option>
+        <option th:value="false">Inactivo</option>
+      </select>
+      <span class="error" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></span>
+    </div>
+    <div class="acciones">
+      <button class="boton" type="submit">Guardar</button>
+      <a class="boton secundario" th:href="@{/bodegas/}">Cancelar</a>
+    </div>
+    </form>
+  </main>
+</body>
+</html>

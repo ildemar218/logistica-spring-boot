@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bodegas</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Bodegas</h1>
+      <a class="boton" th:href="@{/bodegas/crear}">Crear bodega</a>
+    </div>
+
+    <form class="buscador" th:action="@{/bodegas/}" method="get">
+      <label for="filtro">Código o nombre</label>
+      <input id="filtro" name="filtro" th:value="${filtro}">
+      <button class="boton" type="submit">Buscar</button>
+      <a class="boton secundario" th:if="${filtro}" th:href="@{/bodegas/}">Limpiar</a>
+    </form>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Código</th><th>Nombre</th><th>Ciudad</th><th>Responsable</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="x : ${bodegas}">
+          <td th:text="${x.codigo}"></td>
+          <td th:text="${x.nombre}"></td>
+          <td th:text="${x.ciudad}"></td>
+          <td th:text="${x.responsable}"></td>
+          <td th:text="${x.telefono}"></td>
+          <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
+          <td class="acciones-fila">
+            <a th:href="@{/bodegas/editar/{id}(id=${x.bodegaId})}">Editar</a>
+            <form th:action="@{/bodegas/eliminar/{id}(id=${x.bodegaId})}" method="post"
+                  onsubmit="return confirm('¿Eliminar esta bodega?')">
+              <button class="enlace-peligro" type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(bodegas)}">
+          <td colspan="7" class="vacio">No hay registros para mostrar.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </main>
+</body>
+</html>

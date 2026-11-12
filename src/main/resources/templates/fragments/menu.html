@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Menú común de las páginas internas. Se incluye con th:replace="~{fragments/menu :: menu}" -->
+<header class="barra" th:fragment="menu">
+  <a class="marca" th:href="@{/principal}">Logística</a>
+  <nav>
+    <span class="grupo">Catálogos</span>
+    <a th:href="@{/proveedores/}">Proveedores</a>
+    <a th:href="@{/clientes/}">Clientes</a>
+    <a th:href="@{/categorias/}">Categorías</a>
+    <a th:href="@{/productos/}">Productos</a>
+    <a th:href="@{/bodegas/}">Bodegas</a>
+    <span class="grupo">Operación</span>
+    <a th:href="@{/ordenes-compra/}">Órdenes de compra</a>
+    <a th:href="@{/despachos/}">Despachos</a>
+    <span class="grupo">Inventario</span>
+    <a th:href="@{/existencias}">Existencias</a>
+    <a th:href="@{/movimientos}">Kardex</a>
+  </nav>
+  <div class="usuario">
+    <span th:text="${usuarioActual}">usuario</span>
+    <form th:action="@{/logout}" method="post">
+      <button class="enlace-peligro" type="submit">Cerrar sesión</button>
+    </form>
+  </div>
+</header>
+</body>
+</html>

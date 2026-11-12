@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Despacho</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1 th:text="${'Despacho ' + despacho.numero}">Despacho</h1>
+      <a class="boton secundario" th:href="@{/despachos/}">Volver al listado</a>
+    </div>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <dl class="ficha">
+      <div><dt>Estado</dt><dd><span th:replace="~{fragments/estados :: despacho(${despacho.estado})}"></span></dd></div>
+      <div><dt>Fecha</dt><dd th:text="${#temporals.format(despacho.fecha, 'dd/MM/yyyy')}"></dd></div>
+      <div><dt>Entregado</dt>
+        <dd th:text="${despacho.fechaEntrega != null} ? ${#temporals.format(despacho.fechaEntrega, 'dd/MM/yyyy HH:mm')} : '—'"></dd></div>
+      <div><dt>Cliente</dt><dd th:text="${despacho.clienteNombre}"></dd></div>
+      <div><dt>Bodega de origen</dt><dd th:text="${despacho.bodegaNombre}"></dd></div>
+      <div><dt>Dirección de entrega</dt><dd th:text="${despacho.direccionEntrega}"></dd></div>
+      <div><dt>Transportista</dt><dd th:text="${despacho.transportista != null} ? ${despacho.transportista} : '—'"></dd></div>
+      <div><dt>Número de guía</dt><dd th:text="${despacho.numeroGuia != null} ? ${despacho.numeroGuia} : '—'"></dd></div>
+      <div><dt>Observación</dt><dd th:text="${despacho.observacion != null} ? ${despacho.observacion} : '—'"></dd></div>
+    </dl>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Producto</th><th class="num">Cantidad</th>
+              <th class="num">Precio unitario</th><th class="num">Subtotal</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="d : ${despacho.detalles}">
+            <td th:text="${d.productoCodigo}"></td>
+            <td th:text="${d.productoNombre}"></td>
+            <td class="num" th:text="${d.cantidad}"></td>
+            <td class="num" th:text="${#numbers.formatDecimal(d.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td class="num" th:text="${#numbers.formatDecimal(d.subtotal, 1, 'POINT', 2, 'COMMA')}"></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="4" class="num">Subtotal</td>
+              <td class="num" th:text="${#numbers.formatDecimal(despacho.subtotal, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">IVA 19 %</td>
+              <td class="num" th:text="${#numbers.formatDecimal(despacho.iva, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+          <tr><td colspan="4" class="num">Total</td>
+              <td class="num" th:text="${#numbers.formatDecimal(despacho.total, 1, 'POINT', 2, 'COMMA')}"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="acciones" th:if="${despacho.estado == 'DESPACHADO'}">
+      <form th:action="@{/despachos/{id}/entregar(id=${despacho.despachoId})}" method="post"
+            onsubmit="return confirm('¿Confirmar que el cliente recibió la mercancía?')">
+        <button class="boton exito" type="submit">Marcar como entregado</button>
+      </form>
+      <form th:action="@{/despachos/{id}/anular(id=${despacho.despachoId})}" method="post"
+            onsubmit="return confirm('¿Anular el despacho? La mercancía volverá a la bodega.')">
+        <button class="boton peligro" type="submit">Anular despacho</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

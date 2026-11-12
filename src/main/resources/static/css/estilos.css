@@ -1,0 +1,240 @@
+/* Sistema de logística — estilos únicos para todas las páginas */
+:root {
+    --fondo: #0f172a;
+    --panel: #1e293b;
+    --borde: #334155;
+    --texto: #e2e8f0;
+    --suave: #94a3b8;
+    --acento: #60a5fa;
+    --boton: #2563eb;
+    --ok-fondo: #14532d;
+    --ok-texto: #bbf7d0;
+    --mal-fondo: #7f1d1d;
+    --mal-texto: #fecaca;
+    --aviso-fondo: #713f12;
+    --aviso-texto: #fde68a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+}
+
+a { color: var(--acento); }
+a:hover { color: #93c5fd; }
+
+h1 { margin: 0 0 6px; font-size: 24px; color: var(--acento); }
+h2 { margin: 28px 0 12px; font-size: 18px; color: var(--texto); }
+
+/* ---------- Páginas públicas (inicio, login, registro): tarjeta centrada ---------- */
+body.centrado {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.tarjeta {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.subtitulo { margin: 0 0 22px; color: var(--suave); font-size: 14px; }
+.enlaces { margin-top: 18px; text-align: center; font-size: 14px; color: var(--suave); }
+
+/* ---------- Páginas internas: menú superior y contenido ---------- */
+.barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
+    padding: 12px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--borde);
+}
+
+.barra .marca { font-weight: bold; color: var(--acento); text-decoration: none; margin-right: 8px; }
+.barra nav { display: flex; flex-wrap: wrap; gap: 4px 14px; flex: 1; }
+.barra nav a { color: var(--texto); text-decoration: none; font-size: 14px; }
+.barra nav a:hover { color: var(--acento); }
+.barra .grupo { color: var(--suave); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.barra .usuario { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--suave); }
+.barra .usuario form { margin: 0; }
+
+main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+.titulo-pagina {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+/* ---------- Formularios ---------- */
+.formulario {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 4px 20px;
+}
+
+.formulario.ancho { max-width: none; }
+.formulario > .mensaje, .formulario > .acciones, .formulario > .ancho-completo { grid-column: 1 / -1; }
+
+.campo { margin-bottom: 14px; }
+
+label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: bold; color: #cbd5e1; }
+
+input, select, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    background: var(--fondo);
+    color: var(--texto);
+    font-size: 15px;
+    font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--acento);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+}
+
+.error { display: block; margin-top: 4px; color: #f87171; font-size: 13px; }
+
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+/* ---------- Botones ---------- */
+.boton {
+    display: inline-block;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--boton);
+    color: #fff;
+    font-size: 15px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+.boton:hover { background: #3b82f6; color: #fff; }
+.boton.secundario { background: var(--borde); color: var(--texto); }
+.boton.secundario:hover { background: #475569; }
+.boton.peligro { background: #b91c1c; }
+.boton.peligro:hover { background: #dc2626; }
+.boton.exito { background: #15803d; }
+.boton.exito:hover { background: #16a34a; }
+.tarjeta .boton { display: block; width: 100%; margin-bottom: 10px; }
+
+.enlace-peligro {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #f87171;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* ---------- Mensajes ---------- */
+.mensaje { padding: 10px 12px; border-radius: 6px; margin: 0 0 16px; font-size: 14px; }
+.mensaje p { margin: 0; }
+.mensaje.ok { background: var(--ok-fondo); color: var(--ok-texto); }
+.mensaje.mal { background: var(--mal-fondo); color: var(--mal-texto); }
+.mensaje.aviso { background: var(--aviso-fondo); color: var(--aviso-texto); }
+
+/* ---------- Buscador ---------- */
+.buscador { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
+.buscador label { width: 100%; margin: 0; }
+.buscador input, .buscador select { width: auto; flex: 1; min-width: 180px; }
+
+/* ---------- Tablas ---------- */
+.tabla-contenedor { overflow-x: auto; border: 1px solid var(--borde); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+th { background: #273449; color: #cbd5e1; font-weight: bold; white-space: nowrap; }
+tbody tr:hover { background: #243247; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+td.vacio { text-align: center; color: var(--suave); padding: 24px; }
+tfoot td { font-weight: bold; background: #273449; }
+.acciones-fila { white-space: nowrap; }
+.acciones-fila form { display: inline; margin-left: 10px; }
+
+/* Tabla de detalle editable (órdenes y despachos) */
+.detalle td { padding: 6px 8px; }
+.detalle input, .detalle select { padding: 7px 8px; font-size: 14px; }
+.detalle .col-cantidad { width: 110px; }
+.detalle .col-valor { width: 150px; }
+.detalle .col-disponible { width: 110px; text-align: right; color: var(--suave); }
+
+/* ---------- Etiquetas de estado ---------- */
+.etiqueta {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.etiqueta.ok { background: var(--ok-fondo); color: var(--ok-texto); }
+.etiqueta.mal { background: var(--mal-fondo); color: var(--mal-texto); }
+.etiqueta.aviso { background: var(--aviso-fondo); color: var(--aviso-texto); }
+.etiqueta.info { background: #1e3a8a; color: #bfdbfe; }
+.etiqueta.apagada { background: var(--borde); color: var(--suave); }
+
+/* ---------- Tablero ---------- */
+.indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+.indicador {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--texto);
+}
+.indicador:hover { border-color: var(--acento); color: var(--texto); }
+.indicador .valor { font-size: 30px; font-weight: bold; color: var(--acento); }
+.indicador .valor.alerta { color: #f87171; }
+.indicador .nombre { font-size: 14px; color: var(--suave); }
+
+/* Ficha de un documento (orden o despacho) */
+.ficha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px 24px;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+}
+.ficha dt { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .04em; }
+.ficha dd { margin: 2px 0 0; font-size: 15px; }
+
+/* Flujo de la cadena de suministro en el tablero */
+.flujo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 4px; color: var(--suave); font-size: 14px; }
+.flujo span.paso { background: var(--panel); border: 1px solid var(--borde); border-radius: 6px; padding: 6px 10px; color: var(--texto); }
+
+@media (max-width: 640px) {
+    main { padding: 16px; }
+    .barra { padding: 12px 16px; }
+    .formulario { padding: 16px; }
+}

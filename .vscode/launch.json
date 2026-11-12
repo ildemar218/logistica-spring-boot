@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Logistica",
+      "request": "launch",
+      "mainClass": "co.edu.unipacifico.logistica.LogisticaApplication",
+      "projectName": "logistica",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}

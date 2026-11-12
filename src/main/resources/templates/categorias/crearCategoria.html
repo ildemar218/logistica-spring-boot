@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear categoría</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <h1>Crear categoría</h1>
+    <form class="formulario" th:action="@{/categorias/crear}" th:object="${categoriaDto}" method="post">
+      <div class="mensaje mal" th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+      </div>
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" th:field="*{nombre}" maxlength="80" required>
+      <span class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+    </div>
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <input id="descripcion" type="text" th:field="*{descripcion}" maxlength="255">
+      <span class="error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+    </div>
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" th:field="*{estado}">
+        <option th:value="true">Activo</option>
+        <option th:value="false">Inactivo</option>
+      </select>
+      <span class="error" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></span>
+    </div>
+    <div class="acciones">
+      <button class="boton" type="submit">Guardar</button>
+      <a class="boton secundario" th:href="@{/categorias/}">Cancelar</a>
+    </div>
+    </form>
+  </main>
+</body>
+</html>

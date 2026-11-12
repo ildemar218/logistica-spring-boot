@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Productos</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="app">
+  <header th:replace="~{fragments/menu :: menu}"></header>
+  <main>
+    <div class="titulo-pagina">
+      <h1>Productos</h1>
+      <a class="boton" th:href="@{/productos/crear}">Crear producto</a>
+    </div>
+
+    <form class="buscador" th:action="@{/productos/}" method="get">
+      <label for="filtro">Código o nombre</label>
+      <input id="filtro" name="filtro" th:value="${filtro}">
+      <button class="boton" type="submit">Buscar</button>
+      <a class="boton secundario" th:if="${filtro}" th:href="@{/productos/}">Limpiar</a>
+    </form>
+
+    <p class="mensaje ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <p class="mensaje mal" th:if="${error}" th:text="${error}"></p>
+
+    <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Código (SKU)</th><th>Nombre</th><th>Categoría</th><th>Unidad de medida</th><th>Precio de venta</th><th>Stock mínimo</th><th>Stock máximo</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="x : ${productos}">
+          <td th:text="${x.codigo}"></td>
+          <td th:text="${x.nombre}"></td>
+          <td th:text="${x.categoriaNombre}"></td>
+          <td th:text="${x.unidadMedida}"></td>
+          <td class="num" th:text="${#numbers.formatDecimal(x.precioVenta, 1, 'POINT', 2, 'COMMA')}"></td>
+          <td class="num" th:text="${x.stockMinimo}"></td>
+          <td class="num" th:text="${x.stockMaximo}"></td>
+          <td><span th:class="${x.estado} ? 'etiqueta ok' : 'etiqueta apagada'" th:text="${x.estado} ? 'Activo' : 'Inactivo'"></span></td>
+          <td class="acciones-fila">
+            <a th:href="@{/productos/editar/{id}(id=${x.productoId})}">Editar</a>
+            <form th:action="@{/productos/eliminar/{id}(id=${x.productoId})}" method="post"
+                  onsubmit="return confirm('¿Eliminar este producto?')">
+              <button class="enlace-peligro" type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(productos)}">
+          <td colspan="9" class="vacio">No hay registros para mostrar.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </main>
+</body>
+</html>
